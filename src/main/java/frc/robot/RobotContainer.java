@@ -18,9 +18,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.shooter.Shooter;
+
+import lombok.Getter;
 
 public class RobotContainer {
-    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -36,8 +39,15 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    @Getter
+    private static Shooter shooter;
+
     public RobotContainer() {
+        initializeSubsystems();
+        RobotStates.setupStates();
+
         configureBindings();
+        setupSubsystems();
     }
 
     private void configureBindings() {
@@ -73,6 +83,17 @@ public class RobotContainer {
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        joystick.rightBumper().onTrue(drivetrain.runOnce(()-> 
+        { 
+            MaxSpeed= 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+            drive.withDeadband(MaxSpeed*0.1);
+
+        }));
+        joystick.rightBumper().onFalse(drivetrain.runOnce(()->{
+            MaxSpeed= 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+            drive.withDeadband(MaxSpeed*0.1);
+        
+        }));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -94,5 +115,13 @@ public class RobotContainer {
             // Finally idle for the rest of auton
             drivetrain.applyRequest(() -> idle)
         );
+    }
+
+    private void initializeSubsystems() {
+        shooter = new Shooter();
+    }
+
+    private void setupSubsystems() {
+        shooter.setup();
     }
 }
