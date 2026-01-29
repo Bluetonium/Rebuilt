@@ -1,5 +1,8 @@
 package frc.robot;
 
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.XboxController;
@@ -20,6 +23,8 @@ public class RobotStates {
 
     private static final XboxController controller = new XboxController(DriverConfigs.port);
 
+    private static final ReentrantLock m_cacheDataMutex = new ReentrantLock();
+
     public RobotStates() {
         setupStates();
     }
@@ -37,6 +42,14 @@ public class RobotStates {
     public static Trigger runShooter;
     public static Trigger reverseShooter;
 
+    private static BooleanSupplier isRightTriggerDown() {        
+        return () -> RobotStates.controller.getRightTriggerAxis() > 0.1;
+    }
+
+    private static BooleanSupplier isLeftTriggerDown() {        
+        return () -> RobotStates.controller.getLeftTriggerAxis() > 0.1;
+    }
+
     public static void setupStates() {
         teleop = new Trigger(DriverStation::isTeleopEnabled);
         autoMode = new Trigger(RobotState::isAutonomous);
@@ -47,7 +60,7 @@ public class RobotStates {
 
         endGame = teleop.and(() -> DriverStation.getMatchTime() < 20);
 
-        runShooter = new Trigger(controller::getAButton);
-        reverseShooter = new Trigger(controller::getBButton);
+        runShooter = new Trigger(isRightTriggerDown());
+        reverseShooter = new Trigger(isLeftTriggerDown());
     }
 }

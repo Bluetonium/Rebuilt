@@ -77,8 +77,8 @@ public class Shooter extends SubsystemBase {
         applyConfig();
 
         sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");
-
-        SendableRegistry.add(this, "Outtake");
+        
+        SendableRegistry.add(this, "Module 0");
         SmartDashboard.putData(this);
     }
 

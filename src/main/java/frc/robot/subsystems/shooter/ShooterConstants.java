@@ -6,18 +6,18 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.utils.sim.RollerConfig;
 
 public class ShooterConstants {
-    public static final double ACCELERATION = 100;
-    public static final double FORWARD_VELOCITY = 10;
-    public static final double BACKWARD_VELOCITY = -2;
+    public static final double ACCELERATION = 90;
+    public static final double FORWARD_VELOCITY = -5;
+    public static final double BACKWARD_VELOCITY =4;
 
     public static final int SHOOTER_MOTOR_CAN_ID = 16;
     public static final NeutralModeValue SHOOTER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
 
     public static final CurrentLimitsConfigs CURRENT_LIMITS = new CurrentLimitsConfigs()
-                        .withStatorCurrentLimit(70)
-                        .withSupplyCurrentLimit(40);
+        .withStatorCurrentLimit(120)
+        .withSupplyCurrentLimit(60);
 
-    public static final double GEAR_RATIO = 5;
+    public static final double GEAR_RATIO = 1;
 
     // PID
     public static final double kP = 0.69993;
