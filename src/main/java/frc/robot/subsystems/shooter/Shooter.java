@@ -37,12 +37,14 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Shooter");
+        builder.setSmartDashboardType("Shooter");//TODO rename to be consistant
         builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity, null);
         builder.addDoubleProperty("Velocity", () -> motor.getVelocity().getValueAsDouble(), null);
     }
 
     // Who knows what ts does
+    // I know what this does C: .... will i tell you... yes
+    //this is used when tuning the mechanics, its a command you run that logs the motion of the motor while moving and then you use sysid to analize it
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null, // Use default ramp rate (1 V/s)
@@ -60,7 +62,7 @@ public class Shooter extends SubsystemBase {
         motor.setNeutralMode(ShooterConstants.SHOOTER_MOTOR_NEUTRAL_MODE);
 
         motorConfig = new TalonFXConfiguration();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
         motorConfig.CurrentLimits = ShooterConstants.CURRENT_LIMITS;
 
         FeedbackConfigs feedback = motorConfig.Feedback;
@@ -76,9 +78,9 @@ public class Shooter extends SubsystemBase {
 
         applyConfig();
 
-        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");
+        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");//TODO rename to be consistant
         
-        SendableRegistry.add(this, "Module 0");
+        SendableRegistry.add(this, "Module 0");//TODO rename?? why is this module 0
         SmartDashboard.putData(this);
     }
 
@@ -86,14 +88,14 @@ public class Shooter extends SubsystemBase {
         StatusCode status = motor.getConfigurator().apply(motorConfig);
         if (!status.isOK()) {
             DriverStation.reportWarning(
-                    status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);
+                    status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);//TODO rename to be consistant
         }
     }
 
     public void setup() {
         setDefaultCommand(run(() -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }).withName("Outtake.Stopped"));
+        }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
 
         ShooterStates.setupStates();
     }
@@ -103,6 +105,8 @@ public class Shooter extends SubsystemBase {
         sim.simulationPeriodic();
     }
 
+    //TODO can map these to buttons that will like never be used or like have a flag in the code you can set that enables it.
+    //last year we used a smart dashboard thing... hmm perhaps it could use like a control mapped to slot 3 or whatever
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutine.quasistatic(direction);
     }

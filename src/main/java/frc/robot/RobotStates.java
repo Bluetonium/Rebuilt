@@ -23,8 +23,6 @@ public class RobotStates {
 
     private static final XboxController controller = new XboxController(DriverConfigs.port);
 
-    private static final ReentrantLock m_cacheDataMutex = new ReentrantLock();
-
     public RobotStates() {
         setupStates();
     }

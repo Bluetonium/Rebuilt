@@ -15,6 +15,8 @@ public class Robot extends TimedRobot {
 
     private final RobotContainer m_robotContainer;
 
+    private RobotSim sim;//whoopsy you forgot to make this so the sim doesnt work, i fixed it though C:
+
     /* log and replay timestamp and joystick data */
     private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
         .withTimestampReplay()
@@ -22,6 +24,8 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
+
+        sim  = new RobotSim();
     }
 
     @Override
