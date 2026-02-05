@@ -12,7 +12,7 @@ import lombok.Setter;
 public class RobotStates {
     public static class DriverConfigs {
         @Setter
-        protected static int port = 0;
+        protected static int port = 1;
         @Setter
         protected static boolean elevatorControl = false;
         @Setter
@@ -35,10 +35,13 @@ public class RobotStates {
     public static Trigger dsAttached;
     public static Trigger endGame;
     public static Trigger Estopped;
+    
 
     // shooter
     public static Trigger runShooter;
     public static Trigger reverseShooter;
+    public static Trigger sysDyn;
+    public static Trigger sysSta;
 
     private static BooleanSupplier isRightTriggerDown() {        
         return () -> RobotStates.controller.getRightTriggerAxis() > 0.1;
@@ -60,5 +63,7 @@ public class RobotStates {
 
         runShooter = new Trigger(isRightTriggerDown());
         reverseShooter = new Trigger(isLeftTriggerDown());
+        sysDyn = new Trigger(controller::getXButton);
+        sysSta = new Trigger(controller::getYButton);
     }
 }

@@ -12,18 +12,18 @@ public class ShooterConstants {
      * i kinda forget
      */
     public static final double ACCELERATION = 90;
-    public static final double FORWARD_VELOCITY = -5;
-    public static final double BACKWARD_VELOCITY = 4;
+    public static final double FORWARD_VELOCITY = -1;
+    public static final double BACKWARD_VELOCITY = 1;
 
     public static final int SHOOTER_MOTOR_CAN_ID = 16;
     public static final NeutralModeValue SHOOTER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
 
     public static final CurrentLimitsConfigs CURRENT_LIMITS = new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(120)// holy hell man this thing doesnt need 1,400 watts of power,
+            .withStatorCurrentLimit(50)// holy hell man this thing doesnt need 1,400 watts of power,
             // this should be like maybe 50-60, do some testing, more current = more power,
             // its current got the same power as like a drivetrain, wayy overkill
             // Its also a safety thing, it should only be as strong as it needs to be
-            .withSupplyCurrentLimit(60);// keep this bellow 40 idealy, this is how much power it should be able to take
+            .withSupplyCurrentLimit(30);// keep this bellow 40 idealy, this is how much power it should be able to take
                                         // from the PDH, 60 is too much (ps all of the supply currents of everything
                                         // should idealy be <120)
 

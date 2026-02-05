@@ -51,7 +51,7 @@ public class Shooter extends SubsystemBase {
                     Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
                     null, // Use default timeout (10 s)
                           // Log state with Phoenix SignalLogger class
-                    (state) -> SignalLogger.writeString("SysIdOuttake_State", state.toString())),
+                    (state) -> SignalLogger.writeString("SysIdShooter", state.toString())),
             new SysIdRoutine.Mechanism(
                     (volts) -> motor.setControl(m_sysIdControl.withOutput(volts.in(Volts))),
                     null,
@@ -94,7 +94,7 @@ public class Shooter extends SubsystemBase {
 
     public void setup() {
         setDefaultCommand(run(() -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            //motor.setControl(mmVelocityVoltage.withVelocity(0));
         }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
 
         ShooterStates.setupStates();
