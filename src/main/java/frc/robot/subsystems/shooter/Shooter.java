@@ -17,6 +17,7 @@ import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -93,9 +94,29 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setup() {
+//TODO  set this to be something better (more information below)
+/**
+ * telling it to set speed to 0 isnt necesarry bad its just not needed. The shooter doesnt need to try to activily stop
+ * rather you can just run motor.StopMotor() just so it will stop anything causing it to stay at speed but doesnt tell it
+ * to try to stay at 0 speed
+ * 
+ * Something like this might be ideal
+ * 
+ * runOnce(motor::stopMotor).andThen(Commands.idle(this));
+ * 
+ * runOnce() <- Causes the passed function to only runOnce and then command ends
+ * motor::stopMotor <- passes a reference to the stopMotor function for the runOnce to call
+ * .andThen() <- after that runOnce happens schedule(run) this next command
+ * Commands.idle() <- a command that does nothing, have to pass a reference of this becuase it still uses this subystem
+ * 
+ * usualy Commands. [something] will require you to pass "requirements"
+ * requirements are whatever subsystem the commmand will use, needs to know this to prevent 2 commands using the same subsystem at once
+ */
+
         setDefaultCommand(run(() -> {
             //motor.setControl(mmVelocityVoltage.withVelocity(0));
         }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
+
 
         ShooterStates.setupStates();
     }

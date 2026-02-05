@@ -36,8 +36,13 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
+
+    //TODO fix this, controls should all be defined in thesame place, this is all pre-gen CTRE code that youll need to change 
+
+    //Look at last years chassis states code, trace the code, figure out how it works and implement it here becuase this hurts
+    
     private final CommandXboxController joystick = new CommandXboxController(0);
-    private final CommandXboxController outTakeShooter = new CommandXboxController(1);
+   
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
