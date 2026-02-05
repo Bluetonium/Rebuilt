@@ -17,7 +17,6 @@ import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -25,9 +24,9 @@ import frc.robot.RobotSim;
 import frc.utils.sim.RollerSim;
 
 public class Shooter extends SubsystemBase {
-    //Kraken S44
+    // Kraken S44
 
-    //@Getter
+    // @Getter
     private TalonFX motor;
     private RollerSim sim;
     private final VoltageOut m_sysIdControl = new VoltageOut(0);
@@ -38,14 +37,15 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Shooter");//TODO rename to be consistant
+        builder.setSmartDashboardType("Shooter");// TODO rename to be consistant
         builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity, null);
         builder.addDoubleProperty("Velocity", () -> motor.getVelocity().getValueAsDouble(), null);
     }
 
     // Who knows what ts does
     // I know what this does C: .... will i tell you... yes
-    //this is used when tuning the mechanics, its a command you run that logs the motion of the motor while moving and then you use sysid to analize it
+    // this is used when tuning the mechanics, its a command you run that logs the
+    // motion of the motor while moving and then you use sysid to analize it
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null, // Use default ramp rate (1 V/s)
@@ -63,7 +63,8 @@ public class Shooter extends SubsystemBase {
         motor.setNeutralMode(ShooterConstants.SHOOTER_MOTOR_NEUTRAL_MODE);
 
         motorConfig = new TalonFXConfiguration();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
+        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;// TODO maybe have this be in
+                                                                                   // constants
         motorConfig.CurrentLimits = ShooterConstants.CURRENT_LIMITS;
 
         FeedbackConfigs feedback = motorConfig.Feedback;
@@ -79,9 +80,13 @@ public class Shooter extends SubsystemBase {
 
         applyConfig();
 
-        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");//TODO rename to be consistant
-        
-        SendableRegistry.add(this, "Module 0");//TODO rename?? why is this module 0
+        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");// TODO
+                                                                                                                    // rename
+                                                                                                                    // to
+                                                                                                                    // be
+                                                                                                                    // consistant
+
+        SendableRegistry.add(this, "Module 0");// TODO rename?? why is this module 0
         SmartDashboard.putData(this);
     }
 
@@ -89,34 +94,41 @@ public class Shooter extends SubsystemBase {
         StatusCode status = motor.getConfigurator().apply(motorConfig);
         if (!status.isOK()) {
             DriverStation.reportWarning(
-                    status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);//TODO rename to be consistant
+                    status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);// TODO
+                                                                                                              // rename
+                                                                                                              // to be
+                                                                                                              // consistant
         }
     }
 
     public void setup() {
-//TODO  set this to be something better (more information below)
-/**
- * telling it to set speed to 0 isnt necesarry bad its just not needed. The shooter doesnt need to try to activily stop
- * rather you can just run motor.StopMotor() just so it will stop anything causing it to stay at speed but doesnt tell it
- * to try to stay at 0 speed
- * 
- * Something like this might be ideal
- * 
- * runOnce(motor::stopMotor).andThen(Commands.idle(this));
- * 
- * runOnce() <- Causes the passed function to only runOnce and then command ends
- * motor::stopMotor <- passes a reference to the stopMotor function for the runOnce to call
- * .andThen() <- after that runOnce happens schedule(run) this next command
- * Commands.idle() <- a command that does nothing, have to pass a reference of this becuase it still uses this subystem
- * 
- * usualy Commands. [something] will require you to pass "requirements"
- * requirements are whatever subsystem the commmand will use, needs to know this to prevent 2 commands using the same subsystem at once
- */
+        // TODO set this to be something better (more information below)
+        /**
+         * telling it to set speed to 0 isnt necesarry bad its just not needed. The
+         * shooter doesnt need to try to activily stop
+         * rather you can just run motor.StopMotor() just so it will stop anything
+         * causing it to stay at speed but doesnt tell it
+         * to try to stay at 0 speed
+         * 
+         * Something like this might be ideal
+         * 
+         * runOnce(motor::stopMotor).andThen(Commands.idle(this));
+         * 
+         * runOnce() <- Causes the passed function to only runOnce and then command ends
+         * motor::stopMotor <- passes a reference to the stopMotor function for the
+         * runOnce to call
+         * .andThen() <- after that runOnce happens schedule(run) this next command
+         * Commands.idle() <- a command that does nothing, have to pass a reference of
+         * this becuase it still uses this subystem
+         * 
+         * usualy Commands. [something] will require you to pass "requirements"
+         * requirements are whatever subsystem the commmand will use, needs to know this
+         * to prevent 2 commands using the same subsystem at once
+         */
 
         setDefaultCommand(run(() -> {
-            //motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
-
+            // motor.setControl(mmVelocityVoltage.withVelocity(0));
+        }).withName("Outtake.Stopped"));// TODO once again rename to be consistant
 
         ShooterStates.setupStates();
     }
@@ -126,8 +138,10 @@ public class Shooter extends SubsystemBase {
         sim.simulationPeriodic();
     }
 
-    //TODO can map these to buttons that will like never be used or like have a flag in the code you can set that enables it.
-    //last year we used a smart dashboard thing... hmm perhaps it could use like a control mapped to slot 3 or whatever
+    // TODO can map these to buttons that will like never be used or like have a
+    // flag in the code you can set that enables it.
+    // last year we used a smart dashboard thing... hmm perhaps it could use like a
+    // control mapped to slot 3 or whatever
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutine.quasistatic(direction);
     }
@@ -143,21 +157,21 @@ public class Shooter extends SubsystemBase {
 
     public Command runForward() {
         return new StartEndCommand(
-        () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FORWARD_VELOCITY));
-        },
-        () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }, this);
+                () -> {
+                    motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FORWARD_VELOCITY));
+                },
+                () -> {
+                    motor.setControl(mmVelocityVoltage.withVelocity(0));
+                }, this);
     }
 
     public Command runBackward() {
         return new StartEndCommand(
-        () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.BACKWARD_VELOCITY));
-        },
-        () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }, this);
+                () -> {
+                    motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.BACKWARD_VELOCITY));
+                },
+                () -> {
+                    motor.setControl(mmVelocityVoltage.withVelocity(0));
+                }, this);
     }
 }

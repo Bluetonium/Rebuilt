@@ -1,6 +1,5 @@
 package frc.robot;
 
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,7 +34,6 @@ public class RobotStates {
     public static Trigger dsAttached;
     public static Trigger endGame;
     public static Trigger Estopped;
-    
 
     // shooter
     public static Trigger runShooter;
@@ -43,11 +41,11 @@ public class RobotStates {
     public static Trigger sysDyn;
     public static Trigger sysSta;
 
-    private static BooleanSupplier isRightTriggerDown() {        
+    private static BooleanSupplier isRightTriggerDown() {
         return () -> RobotStates.controller.getRightTriggerAxis() > 0.1;
     }
 
-    private static BooleanSupplier isLeftTriggerDown() {        
+    private static BooleanSupplier isLeftTriggerDown() {
         return () -> RobotStates.controller.getLeftTriggerAxis() > 0.1;
     }
 
