@@ -1,5 +1,4 @@
 package frc.robot.subsystems.shooter;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -12,8 +11,8 @@ public class ShooterConstants {
      * i kinda forget
      */
     public static final double ACCELERATION = 90;
-    public static final double FORWARD_VELOCITY = -1;
-    public static final double BACKWARD_VELOCITY = 1;
+    public static final double FORWARD_VELOCITY = -10;
+    public static final double BACKWARD_VELOCITY = 10;
 
     public static final int SHOOTER_MOTOR_CAN_ID = 16;
     public static final NeutralModeValue SHOOTER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
@@ -31,13 +30,13 @@ public class ShooterConstants {
 
     // PID
     //bro just stole last years pid values lmao
-    public static final double kP = 0.69993;
+    public static final double kP = 0.038024;
     public static final double kI = 0;
     public static final double kD = 0;
 
-    public static final double kS = 0.17299;
-    public static final double kV = 0.47682;
-    public static final double kA = 0.027378;
+    public static final double kS = 0.079022;
+    public static final double kV = 0.12114;
+    public static final double kA = 0.0028202;
 
     public static final RollerConfig ROLLER_SIM_CONFIG = new RollerConfig(4)
             .setPosition(1.341, .35);

@@ -20,6 +20,10 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterStates;
+
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeStates;
+
 import lombok.Getter;
 
 public class RobotContainer {
@@ -36,13 +40,16 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
-    private final CommandXboxController outTakeShooter = new CommandXboxController(1);
+    public final static CommandXboxController controller1 = new CommandXboxController(0);
+    public final static CommandXboxController controller2 = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     @Getter
     private static Shooter shooter;
+
+    @Getter
+    private static Intake intake;
 
     public RobotContainer() {
         initializeSubsystems();
@@ -58,9 +65,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-controller1.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-controller1.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-controller1.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -71,27 +78,27 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        controller1.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        controller1.b().whileTrue(drivetrain.applyRequest(() ->
+            point.withModuleDirection(new Rotation2d(-controller1.getLeftY(), -controller1.getLeftX()))
         ));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        controller1.back().and(controller1.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        controller1.back().and(controller1.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        controller1.start().and(controller1.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        controller1.start().and(controller1.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press.
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-        joystick.rightBumper().onTrue(drivetrain.runOnce(()-> 
+        controller1.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        controller1.rightBumper().onTrue(drivetrain.runOnce(()-> 
         { 
             MaxSpeed= 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
 
         }));
-        joystick.rightBumper().onFalse(drivetrain.runOnce(()->{
+        controller1.rightBumper().onFalse(drivetrain.runOnce(()->{
             MaxSpeed= 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
         
@@ -121,9 +128,12 @@ public class RobotContainer {
 
     private void initializeSubsystems() {
         shooter = new Shooter();
+        intake = new Intake();
     }
 
     private void setupSubsystems() {
         shooter.setup();
+        
+        intake.setup();
     }
 }

@@ -1,11 +1,11 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -23,64 +23,59 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotSim;
 import frc.utils.sim.RollerSim;
 
-public class Shooter extends SubsystemBase {
-    //Kraken S44
 
-    //@Getter
+public class Intake extends SubsystemBase{
+
     private TalonFX motor;
     private RollerSim sim;
     private final VoltageOut m_sysIdControl = new VoltageOut(0);
     private TalonFXConfiguration motorConfig;
 
-    private MotionMagicVelocityVoltage mmVelocityVoltage = new MotionMagicVelocityVoltage(0)
-            .withAcceleration(ShooterConstants.ACCELERATION);
+    private MotionMagicVelocityVoltage mmVelocityVoltage = new MotionMagicVelocityVoltage(0).withAcceleration(IntakeConstants.ACCELERATION);
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Shooter");//TODO rename to be consistant
-        builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity, null);
-        builder.addDoubleProperty("Velocity", () -> motor.getVelocity().getValueAsDouble(), null);
+        builder.setSmartDashboardType("Intake");
+        builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity,null);
+        builder.addDoubleProperty("Velocity", () -> motor.getVelocity().getValueAsDouble(),null);
     }
 
-    // Who knows what ts does
-    // I know what this does C: .... will i tell you... yes
-    //this is used when tuning the mechanics, its a command you run that logs the motion of the motor while moving and then you use sysid to analize it
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null, // Use default ramp rate (1 V/s)
                     Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
                     null, // Use default timeout (10 s)
                           // Log state with Phoenix SignalLogger class
-                    (state) -> SignalLogger.writeString("SysIdShooter", state.toString())),
+                    (state) -> SignalLogger.writeString("SysIdIntake", state.toString())),
             new SysIdRoutine.Mechanism(
                     (volts) -> motor.setControl(m_sysIdControl.withOutput(volts.in(Volts))),
                     null,
                     this));
 
-    public Shooter() {
-        motor = new TalonFX(ShooterConstants.SHOOTER_MOTOR_CAN_ID);
-        motor.setNeutralMode(ShooterConstants.SHOOTER_MOTOR_NEUTRAL_MODE);
-
+    public Intake() {
+        motor = new TalonFX(IntakeConstants.INTAKE_MOTOR_CAN_ID);
+        motor.setNeutralMode(IntakeConstants.INTAKE_MOTOR_NEUTRAL_MODE);
+        
         motorConfig = new TalonFXConfiguration();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
-        motorConfig.CurrentLimits = ShooterConstants.CURRENT_LIMITS;
+        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        motorConfig.CurrentLimits = IntakeConstants.CURRENT_LIMITS;
 
         FeedbackConfigs feedback = motorConfig.Feedback;
-        feedback.SensorToMechanismRatio = ShooterConstants.GEAR_RATIO;
+        feedback.SensorToMechanismRatio = IntakeConstants.GEAR_RATIO;
 
-        Slot0Configs slot0 = motorConfig.Slot0;
-        slot0.kP = ShooterConstants.kP;
-        slot0.kI = ShooterConstants.kI;
-        slot0.kD = ShooterConstants.kD;
-        slot0.kS = ShooterConstants.kS;
-        slot0.kV = ShooterConstants.kV;
-        slot0.kA = ShooterConstants.kA;
+        Slot1Configs slot1 = motorConfig.Slot1;
+        slot1.kP = IntakeConstants.kP;
+        slot1.kI = IntakeConstants.kI;
+        slot1.kD = IntakeConstants.kD;
+        slot1.kS = IntakeConstants.kS;
+        slot1.kV = IntakeConstants.kV;
+        slot1.kA = IntakeConstants.kA;
 
         applyConfig();
 
-        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");//TODO rename to be consistant
+        sim = new RollerSim(IntakeConstants.ROLLER_SIM_CONFIG,RobotSim.rightView,motor.getSimState(),"Intake");
         
-        SendableRegistry.add(this, "Module 0");//TODO rename?? why is this module 0
+        SendableRegistry.add(this,"Module 1" );//TODO rename? idk it says this in shooter.java
         SmartDashboard.putData(this);
     }
 
@@ -93,11 +88,12 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setup() {
+
         setDefaultCommand(run(() -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
+        }).withName("Intake.Stopped"));//TODO once again rename to be consistant
 
-        ShooterStates.setupStates();
+        IntakeStates.setupStates();
     }
 
     @Override
@@ -105,8 +101,8 @@ public class Shooter extends SubsystemBase {
         sim.simulationPeriodic();
     }
 
-    //TODO can map these to buttons that will like never be used or like have a flag in the code you can set that enables it.
-    //last year we used a smart dashboard thing... hmm perhaps it could use like a control mapped to slot 3 or whatever
+
+    //sys id stuff
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutine.quasistatic(direction);
     }
@@ -114,16 +110,12 @@ public class Shooter extends SubsystemBase {
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutine.dynamic(direction);
     }
+    //------
 
-    // In the final version this should have 2 motors + 3 commands
-    // 1: shoot, runs both motors
-    // 2: startup, runs the flywheel to speed it up but not the loader
-    // 3: unjam, runs everything in reverse
-    
     public Command runForward() {
         return new StartEndCommand(
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FORWARD_VELOCITY));
+            motor.setControl(mmVelocityVoltage.withVelocity(IntakeConstants.FORWARD_VELOCITY));
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
@@ -133,7 +125,7 @@ public class Shooter extends SubsystemBase {
     public Command runBackward() {
         return new StartEndCommand(
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.BACKWARD_VELOCITY));
+            motor.setControl(mmVelocityVoltage.withVelocity(IntakeConstants.BACKWARD_VELOCITY));
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
