@@ -8,8 +8,8 @@ public class IntakeConstants {
 
     
     public static final double ACCELERATION = 90;
-    public static final double FORWARD_VELOCITY = -5;
-    public static final double BACKWARD_VELOCITY = 5;
+    public static final double FORWARD_VELOCITY = -10;
+    public static final double BACKWARD_VELOCITY = 10;
 
     public static final int INTAKE_MOTOR_CAN_ID = 17;
     public static final NeutralModeValue INTAKE_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;

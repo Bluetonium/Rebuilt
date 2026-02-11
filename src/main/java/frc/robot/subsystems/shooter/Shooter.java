@@ -127,7 +127,7 @@ public class Shooter extends SubsystemBase {
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }, this);
+        }, this).withName("ShooterForward");
     }
 
     public Command runBackward() {
@@ -137,6 +137,6 @@ public class Shooter extends SubsystemBase {
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }, this);
+        }, this).withName("ShooterReverse");
     }
 }

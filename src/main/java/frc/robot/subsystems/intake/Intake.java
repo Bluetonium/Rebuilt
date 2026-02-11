@@ -119,7 +119,7 @@ public class Intake extends SubsystemBase{
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }, this);
+        }, this).withName("IntakeForward");
     }
 
     public Command runBackward() {
@@ -129,6 +129,6 @@ public class Intake extends SubsystemBase{
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
-        }, this);
+        }, this).withName("IntakeReverse");
     }
 }

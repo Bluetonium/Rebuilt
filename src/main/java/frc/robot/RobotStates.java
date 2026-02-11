@@ -54,21 +54,13 @@ public class RobotStates {
     public static Trigger sysStaRev;
 
     private static BooleanSupplier isRightTriggerDown2() {        
-        return () -> RobotContainer.controller2.getRightTriggerAxis() > 0.1;
+        return () -> RobotContainer.shootController.getRightTriggerAxis() > 0.1;
     }
 
     private static BooleanSupplier isLeftTriggerDown2() {        
-        return () -> RobotContainer.controller2.getLeftTriggerAxis() > 0.1;
+        return () -> RobotContainer.shootController.getLeftTriggerAxis() > 0.1;
     }
 
-    private static BooleanSupplier isRightBumperDown2() {
-        System.out.println("OMG IT WAS PRESS\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        return () -> RobotContainer.controller2.rightBumper().getAsBoolean();
-    }
-
-    private static BooleanSupplier isLeftBumperDown2() {
-        return () -> RobotContainer.controller2.leftBumper().getAsBoolean();
-    }
 
     public static void setupStates() {
         teleop = new Trigger(DriverStation::isTeleopEnabled);
@@ -83,13 +75,14 @@ public class RobotStates {
         runShooter = new Trigger(isRightTriggerDown2());
         reverseShooter = new Trigger(isLeftTriggerDown2());
 
-        runIntake = new Trigger(isRightBumperDown2());
-        reverseIntake = new Trigger(isLeftBumperDown2());
+        //change this part
+        runIntake = RobotContainer.shootController.rightBumper();
+        reverseIntake = RobotContainer.shootController.leftBumper();
 
 
-        sysDyn = new Trigger(RobotContainer.controller2.x());
-        sysSta = new Trigger(RobotContainer.controller2.y());
-        sysDynRev = new Trigger(RobotContainer.controller2.a());
-        sysStaRev = new Trigger(RobotContainer.controller2.b());
+        sysDyn = new Trigger(RobotContainer.shootController.x());
+        sysSta = new Trigger(RobotContainer.shootController.y());
+        sysDynRev = new Trigger(RobotContainer.shootController.a());
+        sysStaRev = new Trigger(RobotContainer.shootController.b());
     }
 }

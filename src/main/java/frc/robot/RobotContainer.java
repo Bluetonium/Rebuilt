@@ -40,8 +40,8 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    public final static CommandXboxController controller1 = new CommandXboxController(0);
-    public final static CommandXboxController controller2 = new CommandXboxController(1);
+    public final static CommandXboxController chassisController = new CommandXboxController(0);
+    public final static CommandXboxController shootController = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -65,9 +65,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-controller1.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-controller1.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-controller1.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-chassisController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-chassisController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-chassisController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -78,27 +78,27 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        controller1.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        controller1.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-controller1.getLeftY(), -controller1.getLeftX()))
+        chassisController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        chassisController.b().whileTrue(drivetrain.applyRequest(() ->
+            point.withModuleDirection(new Rotation2d(-chassisController.getLeftY(), -chassisController.getLeftX()))
         ));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        controller1.back().and(controller1.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        controller1.back().and(controller1.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        controller1.start().and(controller1.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        controller1.start().and(controller1.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        chassisController.back().and(chassisController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        chassisController.back().and(chassisController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        chassisController.start().and(chassisController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        chassisController.start().and(chassisController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press.
-        controller1.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-        controller1.rightBumper().onTrue(drivetrain.runOnce(()-> 
+        chassisController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        chassisController.rightBumper().onTrue(drivetrain.runOnce(()-> 
         { 
             MaxSpeed= 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
 
         }));
-        controller1.rightBumper().onFalse(drivetrain.runOnce(()->{
+        chassisController.rightBumper().onFalse(drivetrain.runOnce(()->{
             MaxSpeed= 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
         
