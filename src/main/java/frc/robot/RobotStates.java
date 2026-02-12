@@ -75,7 +75,7 @@ public class RobotStates {
         runShooter = new Trigger(isRightTriggerDown2());
         reverseShooter = new Trigger(isLeftTriggerDown2());
 
-        //change this part
+        
         runIntake = RobotContainer.shootController.rightBumper();
         reverseIntake = RobotContainer.shootController.leftBumper();
 

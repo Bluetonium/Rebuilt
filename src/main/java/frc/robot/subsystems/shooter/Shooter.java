@@ -27,7 +27,8 @@ public class Shooter extends SubsystemBase {
     //Kraken S44
 
     //@Getter
-    private TalonFX motor;
+    private TalonFX flywheelMotor;
+    
     private RollerSim sim;
     private final VoltageOut m_sysIdControl = new VoltageOut(0);
     private TalonFXConfiguration motorConfig;
@@ -39,7 +40,7 @@ public class Shooter extends SubsystemBase {
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Shooter");//TODO rename to be consistant
         builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity, null);
-        builder.addDoubleProperty("Velocity", () -> motor.getVelocity().getValueAsDouble(), null);
+        builder.addDoubleProperty("Velocity", () -> flywheelMotor.getVelocity().getValueAsDouble(), null);
     }
 
     // Who knows what ts does
@@ -53,13 +54,13 @@ public class Shooter extends SubsystemBase {
                           // Log state with Phoenix SignalLogger class
                     (state) -> SignalLogger.writeString("SysIdShooter", state.toString())),
             new SysIdRoutine.Mechanism(
-                    (volts) -> motor.setControl(m_sysIdControl.withOutput(volts.in(Volts))),
+                    (volts) -> flywheelMotor.setControl(m_sysIdControl.withOutput(volts.in(Volts))),
                     null,
                     this));
 
     public Shooter() {
-        motor = new TalonFX(ShooterConstants.SHOOTER_MOTOR_CAN_ID);
-        motor.setNeutralMode(ShooterConstants.SHOOTER_MOTOR_NEUTRAL_MODE);
+        flywheelMotor = new TalonFX(ShooterConstants.FLYWHEEL_MOTOR_CAN_ID);
+        flywheelMotor.setNeutralMode(ShooterConstants.FLYWHEEL_MOTOR_NEUTRAL_MODE);
 
         motorConfig = new TalonFXConfiguration();
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
@@ -78,14 +79,14 @@ public class Shooter extends SubsystemBase {
 
         applyConfig();
 
-        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, motor.getSimState(), "Outtake");//TODO rename to be consistant
+        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, flywheelMotor.getSimState(), "Outtake");//TODO rename to be consistant
         
         SendableRegistry.add(this, "Module 0");//TODO rename?? why is this module 0
         SmartDashboard.putData(this);
     }
 
     private void applyConfig() {
-        StatusCode status = motor.getConfigurator().apply(motorConfig);
+        StatusCode status = flywheelMotor.getConfigurator().apply(motorConfig);
         if (!status.isOK()) {
             DriverStation.reportWarning(
                     status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);//TODO rename to be consistant
@@ -94,7 +95,7 @@ public class Shooter extends SubsystemBase {
 
     public void setup() {
         setDefaultCommand(run(() -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(0));
         }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
 
         ShooterStates.setupStates();
@@ -123,20 +124,20 @@ public class Shooter extends SubsystemBase {
     public Command runForward() {
         return new StartEndCommand(
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FORWARD_VELOCITY));
+            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_FORWARD_VELOCITY));
         },
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(0));
         }, this).withName("ShooterForward");
     }
 
     public Command runBackward() {
         return new StartEndCommand(
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.BACKWARD_VELOCITY));
+            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_BACKWARD_VELOCITY));
         },
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(0));
         }, this).withName("ShooterReverse");
     }
 }

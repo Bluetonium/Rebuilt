@@ -11,11 +11,21 @@ public class ShooterConstants {
      * i kinda forget
      */
     public static final double ACCELERATION = 90;
-    public static final double FORWARD_VELOCITY = -10;
-    public static final double BACKWARD_VELOCITY = 10;
 
-    public static final int SHOOTER_MOTOR_CAN_ID = 16;
-    public static final NeutralModeValue SHOOTER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+    // flywheel constants
+    public static final double FLYWHEEL_FORWARD_VELOCITY = -10;
+    public static final double FLYWHEEL_BACKWARD_VELOCITY = 10;
+
+    public static final int FLYWHEEL_MOTOR_CAN_ID = 16;
+    public static final NeutralModeValue FLYWHEEL_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+
+    // loader constants
+    public static final double LOADER_FORWARD_VELOCITY = -10;
+    public static final double LOADER_BACKWARD_VELOCITY = 10;
+
+    public static final int LOADER_MOTOR_CAN_ID = 18;
+    public static final NeutralModeValue LOADER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+
 
     public static final CurrentLimitsConfigs CURRENT_LIMITS = new CurrentLimitsConfigs()
             .withStatorCurrentLimit(50)// holy hell man this thing doesnt need 1,400 watts of power,
@@ -29,7 +39,6 @@ public class ShooterConstants {
     public static final double GEAR_RATIO = 1;
 
     // PID
-    //bro just stole last years pid values lmao
     public static final double kP = 0.038024;
     public static final double kI = 0;
     public static final double kD = 0;

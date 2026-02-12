@@ -28,13 +28,13 @@ public class IntakeConstants {
 
     // PID
     //bro just stole last years pid values lmao
-    public static final double kP = 0.038024;
+    public static final double kP = 0.0034178;
     public static final double kI = 0;
     public static final double kD = 0;
 
-    public static final double kS = 0.079022;
-    public static final double kV = 0.12114;
-    public static final double kA = 0.0028202;
+    public static final double kS = 0.044684;
+    public static final double kV = 0.093353;
+    public static final double kA = 0.0011177;
 
     public static final RollerConfig ROLLER_SIM_CONFIG = new RollerConfig(4)
             .setPosition(2, .7);

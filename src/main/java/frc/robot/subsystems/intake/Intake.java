@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -63,13 +63,13 @@ public class Intake extends SubsystemBase{
         FeedbackConfigs feedback = motorConfig.Feedback;
         feedback.SensorToMechanismRatio = IntakeConstants.GEAR_RATIO;
 
-        Slot1Configs slot1 = motorConfig.Slot1;
-        slot1.kP = IntakeConstants.kP;
-        slot1.kI = IntakeConstants.kI;
-        slot1.kD = IntakeConstants.kD;
-        slot1.kS = IntakeConstants.kS;
-        slot1.kV = IntakeConstants.kV;
-        slot1.kA = IntakeConstants.kA;
+        Slot0Configs slot0 = motorConfig.Slot0;
+        slot0.kP = IntakeConstants.kP;
+        slot0.kI = IntakeConstants.kI;
+        slot0.kD = IntakeConstants.kD;
+        slot0.kS = IntakeConstants.kS;
+        slot0.kV = IntakeConstants.kV;
+        slot0.kA = IntakeConstants.kA;
 
         applyConfig();
 
@@ -116,6 +116,7 @@ public class Intake extends SubsystemBase{
         return new StartEndCommand(
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(IntakeConstants.FORWARD_VELOCITY));
+            
         },
         () -> {
             motor.setControl(mmVelocityVoltage.withVelocity(0));
