@@ -13,10 +13,12 @@ public class ShooterStates {
 
 
         //SYS ID TRIGGER CALLS TO GET DATA FOR THE ANALLYZER <-------(Devin's spelling)
-        //RobotStates.sysDyn.whileTrue(shooter.sysIdDynamic(Direction.kForward));
-        //RobotStates.sysSta.whileTrue(shooter.sysIdQuasistatic(Direction.kForward));
-        //RobotStates.sysDynRev.whileTrue(shooter.sysIdDynamic(Direction.kReverse));
-        //RobotStates.sysStaRev.whileTrue(shooter.sysIdQuasistatic(Direction.kReverse));
+        /* 
+        RobotStates.sysDyn.whileTrue(shooter.sysIdDynamic(Direction.kForward));
+        RobotStates.sysSta.whileTrue(shooter.sysIdQuasistatic(Direction.kForward));
+        RobotStates.sysDynRev.whileTrue(shooter.sysIdDynamic(Direction.kReverse));
+        RobotStates.sysStaRev.whileTrue(shooter.sysIdQuasistatic(Direction.kReverse));
+        */
         
     }
 

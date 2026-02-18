@@ -11,11 +11,12 @@ public class IntakeStates {
         RobotStates.runIntake.whileTrue(intake.runForward());
         RobotStates.reverseIntake.whileTrue(intake.runBackward());
 
-
+        /* 
         RobotStates.sysDyn.whileTrue(intake.sysIdDynamic(Direction.kForward));
         RobotStates.sysSta.whileTrue(intake.sysIdQuasistatic(Direction.kForward));
         RobotStates.sysDynRev.whileTrue(intake.sysIdDynamic(Direction.kReverse));
         RobotStates.sysStaRev.whileTrue(intake.sysIdQuasistatic(Direction.kReverse));
+        */
     }
 
     

@@ -28,13 +28,20 @@ public class Shooter extends SubsystemBase {
 
     //@Getter
     private TalonFX flywheelMotor;
+    private TalonFX loaderMotor;
     
-    private RollerSim sim;
-    private final VoltageOut m_sysIdControl = new VoltageOut(0);
-    private TalonFXConfiguration motorConfig;
+    private RollerSim flywheelSim;
+    private final VoltageOut flywheelSysIdControl = new VoltageOut(0);
+    private TalonFXConfiguration flywheelMotorConfig;
+
+
+    //left off here, make everything for loader motor
+    private RollerSim loaderSim;
+    private final VoltageOut loaderSysIdControl = new VoltageOut(0);
+    private TalonFXConfiguration loaderMotorConfig;
 
     private MotionMagicVelocityVoltage mmVelocityVoltage = new MotionMagicVelocityVoltage(0)
-            .withAcceleration(ShooterConstants.ACCELERATION);
+            .withAcceleration(ShooterConstants.FLYWHEEL_ACCELERATION);
 
     @Override
     public void initSendable(SendableBuilder builder) {
@@ -54,7 +61,7 @@ public class Shooter extends SubsystemBase {
                           // Log state with Phoenix SignalLogger class
                     (state) -> SignalLogger.writeString("SysIdShooter", state.toString())),
             new SysIdRoutine.Mechanism(
-                    (volts) -> flywheelMotor.setControl(m_sysIdControl.withOutput(volts.in(Volts))),
+                    (volts) -> flywheelMotor.setControl(flywheelSysIdControl.withOutput(volts.in(Volts))),
                     null,
                     this));
 
@@ -62,14 +69,14 @@ public class Shooter extends SubsystemBase {
         flywheelMotor = new TalonFX(ShooterConstants.FLYWHEEL_MOTOR_CAN_ID);
         flywheelMotor.setNeutralMode(ShooterConstants.FLYWHEEL_MOTOR_NEUTRAL_MODE);
 
-        motorConfig = new TalonFXConfiguration();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
-        motorConfig.CurrentLimits = ShooterConstants.CURRENT_LIMITS;
+        flywheelMotorConfig = new TalonFXConfiguration();
+        flywheelMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
+        flywheelMotorConfig.CurrentLimits = ShooterConstants.CURRENT_LIMITS;
 
-        FeedbackConfigs feedback = motorConfig.Feedback;
+        FeedbackConfigs feedback = flywheelMotorConfig.Feedback;
         feedback.SensorToMechanismRatio = ShooterConstants.GEAR_RATIO;
 
-        Slot0Configs slot0 = motorConfig.Slot0;
+        Slot0Configs slot0 = flywheelMotorConfig.Slot0;
         slot0.kP = ShooterConstants.kP;
         slot0.kI = ShooterConstants.kI;
         slot0.kD = ShooterConstants.kD;
@@ -79,14 +86,14 @@ public class Shooter extends SubsystemBase {
 
         applyConfig();
 
-        sim = new RollerSim(ShooterConstants.ROLLER_SIM_CONFIG, RobotSim.rightView, flywheelMotor.getSimState(), "Outtake");//TODO rename to be consistant
+        flywheelSim = new RollerSim(ShooterConstants.FLYWHEEL_ROLLER_SIM_CONFIG, RobotSim.rightView, flywheelMotor.getSimState(), "Outtake");//TODO rename to be consistant
         
         SendableRegistry.add(this, "Module 0");//TODO rename?? why is this module 0
         SmartDashboard.putData(this);
     }
 
     private void applyConfig() {
-        StatusCode status = flywheelMotor.getConfigurator().apply(motorConfig);
+        StatusCode status = flywheelMotor.getConfigurator().apply(flywheelMotorConfig);
         if (!status.isOK()) {
             DriverStation.reportWarning(
                     status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);//TODO rename to be consistant
@@ -103,7 +110,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        sim.simulationPeriodic();
+        flywheelSim.simulationPeriodic();
     }
 
     //TODO can map these to buttons that will like never be used or like have a flag in the code you can set that enables it.
