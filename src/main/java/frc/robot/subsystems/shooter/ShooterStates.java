@@ -12,7 +12,7 @@ public class ShooterStates {
 
 
 
-        //SYS ID TRIGGER CALLS TO GET DATA FOR THE ANALLYZER <-------(Devin's spelling)
+        //Triggers to get PID values and whatnot
         /* 
         RobotStates.sysDyn.whileTrue(shooter.sysIdDynamic(Direction.kForward));
         RobotStates.sysSta.whileTrue(shooter.sysIdQuasistatic(Direction.kForward));

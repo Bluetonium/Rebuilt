@@ -34,26 +34,25 @@ public class Shooter extends SubsystemBase {
     private final VoltageOut flywheelSysIdControl = new VoltageOut(0);
     private TalonFXConfiguration flywheelMotorConfig;
 
-
     //left off here, make everything for loader motor
     private RollerSim loaderSim;
     private final VoltageOut loaderSysIdControl = new VoltageOut(0);
     private TalonFXConfiguration loaderMotorConfig;
 
-    private MotionMagicVelocityVoltage mmVelocityVoltage = new MotionMagicVelocityVoltage(0)
+    private MotionMagicVelocityVoltage flywheelVelocityVoltage = new MotionMagicVelocityVoltage(0)
             .withAcceleration(ShooterConstants.FLYWHEEL_ACCELERATION);
+
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Shooter");//TODO rename to be consistant
-        builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity, null);
+        builder.setSmartDashboardType("Flywheel");//TODO rename to be consistant
+        builder.addDoubleProperty("Target Velocity", () -> flywheelVelocityVoltage.Velocity, null);
         builder.addDoubleProperty("Velocity", () -> flywheelMotor.getVelocity().getValueAsDouble(), null);
     }
 
-    // Who knows what ts does
-    // I know what this does C: .... will i tell you... yes
+
     //this is used when tuning the mechanics, its a command you run that logs the motion of the motor while moving and then you use sysid to analize it
-    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+    private final SysIdRoutine flywheelSysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null, // Use default ramp rate (1 V/s)
                     Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
@@ -71,10 +70,10 @@ public class Shooter extends SubsystemBase {
 
         flywheelMotorConfig = new TalonFXConfiguration();
         flywheelMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;//TODO maybe have this be in constants
-        flywheelMotorConfig.CurrentLimits = ShooterConstants.CURRENT_LIMITS;
+        flywheelMotorConfig.CurrentLimits = ShooterConstants.FLYWHEEL_CURRENT_LIMITS;
 
-        FeedbackConfigs feedback = flywheelMotorConfig.Feedback;
-        feedback.SensorToMechanismRatio = ShooterConstants.GEAR_RATIO;
+        FeedbackConfigs flywheelFeedback = flywheelMotorConfig.Feedback;
+        flywheelFeedback.SensorToMechanismRatio = ShooterConstants.FLYWHEEL_GEAR_RATIO;
 
         Slot0Configs slot0 = flywheelMotorConfig.Slot0;
         slot0.kP = ShooterConstants.kP;
@@ -96,13 +95,13 @@ public class Shooter extends SubsystemBase {
         StatusCode status = flywheelMotor.getConfigurator().apply(flywheelMotorConfig);
         if (!status.isOK()) {
             DriverStation.reportWarning(
-                    status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);//TODO rename to be consistant
+                    status.getName() + "Failed to apply configs to outtake (flywheel)" + status.getDescription(), false);//TODO rename to be consistant
         }
     }
 
     public void setup() {
         setDefaultCommand(run(() -> {
-            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(0));
+            flywheelMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
         }).withName("Outtake.Stopped"));//TODO once again rename to be consistant
 
         ShooterStates.setupStates();
@@ -116,11 +115,11 @@ public class Shooter extends SubsystemBase {
     //TODO can map these to buttons that will like never be used or like have a flag in the code you can set that enables it.
     //last year we used a smart dashboard thing... hmm perhaps it could use like a control mapped to slot 3 or whatever
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction);
+        return flywheelSysIdRoutine.quasistatic(direction);
     }
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.dynamic(direction);
+        return flywheelSysIdRoutine.dynamic(direction);
     }
 
     // In the final version this should have 2 motors + 3 commands
@@ -131,20 +130,20 @@ public class Shooter extends SubsystemBase {
     public Command runForward() {
         return new StartEndCommand(
         () -> {
-            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_FORWARD_VELOCITY));
+            flywheelMotor.setControl(flywheelVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_FORWARD_VELOCITY));
         },
         () -> {
-            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(0));
+            flywheelMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
         }, this).withName("ShooterForward");
     }
 
     public Command runBackward() {
         return new StartEndCommand(
         () -> {
-            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_BACKWARD_VELOCITY));
+            flywheelMotor.setControl(flywheelVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_BACKWARD_VELOCITY));
         },
         () -> {
-            flywheelMotor.setControl(mmVelocityVoltage.withVelocity(0));
+            flywheelMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
         }, this).withName("ShooterReverse");
     }
 }
