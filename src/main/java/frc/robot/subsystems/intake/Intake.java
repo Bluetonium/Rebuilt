@@ -26,18 +26,35 @@ import frc.utils.sim.RollerSim;
 
 public class Intake extends SubsystemBase{
 
-    private TalonFX motor;
-    private RollerSim sim;
-    private final VoltageOut m_sysIdControl = new VoltageOut(0);
-    private TalonFXConfiguration motorConfig;
+    private TalonFX intakeMotor;
+    private RollerSim intakeSim;
+    private final VoltageOut intakeSysIdControl = new VoltageOut(0);
+    private TalonFXConfiguration intakeMotorConfig;
 
-    private MotionMagicVelocityVoltage mmVelocityVoltage = new MotionMagicVelocityVoltage(0).withAcceleration(IntakeConstants.ACCELERATION);
+    private MotionMagicVelocityVoltage intakeVelocityVoltage = new MotionMagicVelocityVoltage(0).withAcceleration(IntakeConstants.INTAKE_ACCELERATION);
 
+    //the intake dropper motor variables and stuff
+    private TalonFX intakeDropperMotor;
+    private RollerSim intakeDropperSim;
+    private final VoltageOut intakeDropperSysIdControl = new VoltageOut(0);
+    private TalonFXConfiguration intakeDropperMotorConfig;
+
+    private MotionMagicVelocityVoltage intakeDropperVelocityVoltage = new MotionMagicVelocityVoltage(0).withAcceleration(IntakeConstants.INTAKE_DROPPER_ACCELERATION);
+
+    
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Intake");
-        builder.addDoubleProperty("Target Velocity", () -> mmVelocityVoltage.Velocity,null);
-        builder.addDoubleProperty("Velocity", () -> motor.getVelocity().getValueAsDouble(),null);
+
+        builder.addDoubleProperty("Intake Target Velocity", () -> intakeVelocityVoltage.Velocity,null);
+        builder.addDoubleProperty("Intake Velocity", () -> intakeMotor.getVelocity().getValueAsDouble(),null);
+
+        builder.addDoubleProperty("Intake Dropper Target Velocity", () -> intakeDropperVelocityVoltage.Velocity,null);
+        builder.addDoubleProperty("Intake Dropper Velocity", () -> intakeDropperMotor.getVelocity().getValueAsDouble(),null);
+        //
+        // You stopped here Kaiden, don't forget where you stopped that would be bad
+        // continue from here ->
+        //
     }
 
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
@@ -48,39 +65,39 @@ public class Intake extends SubsystemBase{
                           // Log state with Phoenix SignalLogger class
                     (state) -> SignalLogger.writeString("SysIdIntake", state.toString())),
             new SysIdRoutine.Mechanism(
-                    (volts) -> motor.setControl(m_sysIdControl.withOutput(volts.in(Volts))),
+                    (volts) -> intakeMotor.setControl(intakeSysIdControl.withOutput(volts.in(Volts))),
                     null,
                     this));
 
     public Intake() {
-        motor = new TalonFX(IntakeConstants.INTAKE_MOTOR_CAN_ID);
-        motor.setNeutralMode(IntakeConstants.INTAKE_MOTOR_NEUTRAL_MODE);
+        intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_CAN_ID);
+        intakeMotor.setNeutralMode(IntakeConstants.INTAKE_MOTOR_NEUTRAL_MODE);
         
-        motorConfig = new TalonFXConfiguration();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        motorConfig.CurrentLimits = IntakeConstants.CURRENT_LIMITS;
+        intakeMotorConfig = new TalonFXConfiguration();
+        intakeMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        intakeMotorConfig.CurrentLimits = IntakeConstants.INTAKE_CURRENT_LIMITS;
 
-        FeedbackConfigs feedback = motorConfig.Feedback;
-        feedback.SensorToMechanismRatio = IntakeConstants.GEAR_RATIO;
+        FeedbackConfigs feedback = intakeMotorConfig.Feedback;
+        feedback.SensorToMechanismRatio = IntakeConstants.INTAKE_GEAR_RATIO;
 
-        Slot0Configs slot0 = motorConfig.Slot0;
-        slot0.kP = IntakeConstants.kP;
-        slot0.kI = IntakeConstants.kI;
-        slot0.kD = IntakeConstants.kD;
-        slot0.kS = IntakeConstants.kS;
-        slot0.kV = IntakeConstants.kV;
-        slot0.kA = IntakeConstants.kA;
+        Slot0Configs slot0 = intakeMotorConfig.Slot0;
+        slot0.kP = IntakeConstants.kP_intake;
+        slot0.kI = IntakeConstants.kI_intake;
+        slot0.kD = IntakeConstants.kD_intake;
+        slot0.kS = IntakeConstants.kS_intake;
+        slot0.kV = IntakeConstants.kV_intake;
+        slot0.kA = IntakeConstants.kA_intake;
 
         applyConfig();
 
-        sim = new RollerSim(IntakeConstants.ROLLER_SIM_CONFIG,RobotSim.rightView,motor.getSimState(),"Intake");
+        intakeSim = new RollerSim(IntakeConstants.INTAKE_ROLLER_SIM_CONFIG,RobotSim.rightView,intakeMotor.getSimState(),"Intake");
         
         SendableRegistry.add(this,"Module 1" );//TODO rename? idk it says this in shooter.java
         SmartDashboard.putData(this);
     }
 
     private void applyConfig() {
-        StatusCode status = motor.getConfigurator().apply(motorConfig);
+        StatusCode status = intakeMotor.getConfigurator().apply(intakeMotorConfig);
         if (!status.isOK()) {
             DriverStation.reportWarning(
                     status.getName() + "Failed to apply configs to outtake" + status.getDescription(), false);//TODO rename to be consistant
@@ -90,7 +107,7 @@ public class Intake extends SubsystemBase{
     public void setup() {
 
         setDefaultCommand(run(() -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(0));
         }).withName("Intake.Stopped"));//TODO once again rename to be consistant
 
         IntakeStates.setupStates();
@@ -98,7 +115,7 @@ public class Intake extends SubsystemBase{
 
     @Override
     public void simulationPeriodic() {
-        sim.simulationPeriodic();
+        intakeSim.simulationPeriodic();
     }
 
 
@@ -115,21 +132,21 @@ public class Intake extends SubsystemBase{
     public Command runForward() {
         return new StartEndCommand(
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(IntakeConstants.FORWARD_VELOCITY));
+            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(IntakeConstants.INTAKE_FORWARD_VELOCITY));
             
         },
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(0));
         }, this).withName("IntakeForward");
     }
 
     public Command runBackward() {
         return new StartEndCommand(
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(IntakeConstants.BACKWARD_VELOCITY));
+            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(IntakeConstants.INTAKE_BACKWARD_VELOCITY));
         },
         () -> {
-            motor.setControl(mmVelocityVoltage.withVelocity(0));
+            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(0));
         }, this).withName("IntakeReverse");
     }
 }

@@ -6,36 +6,57 @@ import frc.utils.sim.RollerConfig;
 
 public class IntakeConstants {
 
-    
-    public static final double ACCELERATION = 90;
-    public static final double FORWARD_VELOCITY = -10;
-    public static final double BACKWARD_VELOCITY = 10;
+        //this motor is
+    public static final double INTAKE_ACCELERATION = 90;
+    public static final double INTAKE_FORWARD_VELOCITY = -10;
+    public static final double INTAKE_BACKWARD_VELOCITY = 10;
 
     public static final int INTAKE_MOTOR_CAN_ID = 17;
     public static final NeutralModeValue INTAKE_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
 
-    public static final CurrentLimitsConfigs CURRENT_LIMITS = new CurrentLimitsConfigs()
+    public static final CurrentLimitsConfigs INTAKE_CURRENT_LIMITS = new CurrentLimitsConfigs()
             .withStatorCurrentLimit(50)
-
             .withSupplyCurrentLimit(30);
-            /* 
-            Keep this bellow 40 ideally, this is how much power it should be able to take
-            from the PDH, 60 is too much (PS all of the supply currents of everything
-            should ideally be < 120) 
-            */
 
-    public static final double GEAR_RATIO = 1;
+    public static final double INTAKE_GEAR_RATIO = 1;
 
     // PID
-    //bro just stole last years pid values lmao
-    public static final double kP = 0.0034178;
-    public static final double kI = 0;
-    public static final double kD = 0;
+    public static final double kP_intake = 0.0034178;
+    public static final double kI_intake = 0;
+    public static final double kD_intake = 0;
 
-    public static final double kS = 0.044684;
-    public static final double kV = 0.093353;
-    public static final double kA = 0.0011177;
+    public static final double kS_intake = 0.044684;
+    public static final double kV_intake = 0.093353;
+    public static final double kA_intake = 0.0011177;
 
-    public static final RollerConfig ROLLER_SIM_CONFIG = new RollerConfig(4)
+    public static final RollerConfig INTAKE_ROLLER_SIM_CONFIG = new RollerConfig(4)
             .setPosition(2, .7);
+
+    //-----------------------------
+    //intake dropper
+    //-----------------------------
+    public static final double INTAKE_DROPPER_ACCELERATION = 90;
+    public static final double INTAKE_DROPPER_FORWARD_VELOCITY = -10;
+    public static final double INTAKE_DROPPER_BACKWARD_VELOCITY = 10;
+
+    public static final int INTAKE_DROPPER_MOTOR_CAN_ID = 18;
+    public static final NeutralModeValue INTAKE_DROPPER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+
+    public static final CurrentLimitsConfigs INTAKE_DROPPER_CURRENT_LIMITS = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(50)
+            .withSupplyCurrentLimit(30);
+
+    public static final double INTAKE_DROPPER_GEAR_RATIO = 1;
+
+    //TODO TUNE THESE VALUES PEON
+    public static final double kP_dropper = 0.0034178;
+    public static final double kI_dropper = 0;
+    public static final double kD_dropper = 0;
+
+    public static final double kS_dropper = 0.044684;
+    public static final double kV_dropper = 0.093353;
+    public static final double kA_dropper = 0.0011177;
+
+    public static final RollerConfig INTAKE_DROPPER_ROLLER_SIM_CONFIG = new RollerConfig(4)
+            .setPosition(1, 1.7);
 }

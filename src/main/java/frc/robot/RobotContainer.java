@@ -19,10 +19,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterStates;
 
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeStates;
 
 import lombok.Getter;
 
@@ -41,6 +39,8 @@ public class RobotContainer {
 
     public final static CommandXboxController chassisController = new CommandXboxController(0);
     public final static CommandXboxController shootController = new CommandXboxController(1);
+    //i will incorporate this later just dont want to forget or smth idrk
+    public final static CommandXboxController pidController = new CommandXboxController(3);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 

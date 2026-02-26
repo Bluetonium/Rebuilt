@@ -1,9 +1,9 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.units.measure.Current;
 import frc.utils.sim.RollerConfig;
 
 public class ShooterConstants {
@@ -13,6 +13,7 @@ public class ShooterConstants {
         public static final double FLYWHEEL_ACCELERATION = 90;
         public static final double FLYWHEEL_FORWARD_VELOCITY = -90;
         public static final double FLYWHEEL_BACKWARD_VELOCITY = 90;
+        public static  InvertedValue FLYWHEEL_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         //can id
         public static final int FLYWHEEL_MOTOR_CAN_ID = 16;
@@ -27,36 +28,38 @@ public class ShooterConstants {
         public static final double FLYWHEEL_GEAR_RATIO = 1;
 
         //PID values
-        public static final double kP = 0.030071;
-        public static final double kI = 0;
-        public static final double kD = 0;
+        public static final double kP_flywheel = 0.030071;
+        public static final double kI_flywheel = 0;
+        public static final double kD_flywheel = 0;
 
-        public static final double kS = 0.17242;
-        public static final double kV = 0.12144;
-        public static final double kA = 0.0032487;
+        public static final double kS_flywheel = 0.17242;
+        public static final double kV_flywheel = 0.12144;
+        public static final double kA_flywheel = 0.0032487;
 
         //simulator stuff
         public static final RollerConfig FLYWHEEL_ROLLER_SIM_CONFIG = new RollerConfig(4)
                         .setPosition(1.341, .35);
 
 
-        //
+        //---------------------------
         // Loader motor constants
-        //
+        //---------------------------
         public static final double LOADER_ACCELERATION = 90;
         public static final double LOADER_FORWARD_VELOCITY = -10;
         public static final double LOADER_BACKWARD_VELOCITY = 10;
+        public static  InvertedValue LOADER_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         //can id
         public static final int LOADER_MOTOR_CAN_ID = 18;
         public static final NeutralModeValue LOADER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
 
         //current limits
+        //what do these need to be??? its a x44 motor so yeah there you go. please help i dont trust Claude hes drinking all my water
         public static final CurrentLimitsConfigs LOADER_CURRENT_LIMITS = new CurrentLimitsConfigs()
                         .withStatorCurrentLimit(50)
                         .withSupplyCurrentLimit(30);
 
-        public static final double SHOOTER_GEAR_RATIO = 1;
+        public static final double LOADER_GEAR_RATIO = 1;
 
         //PID values
         public static final double kP_loader = 0.038024;
