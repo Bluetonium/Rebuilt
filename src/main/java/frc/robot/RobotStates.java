@@ -37,14 +37,16 @@ public class RobotStates {
     
 
     // shooter
-    public static Trigger runShooter;
-    public static Trigger reverseShooter;
+    public static Trigger unjamShooter; // unjam 
+    public static Trigger fireShooter; // prime, then start lauching balls
+    public static Trigger primeShooter; // only prime
 
     public static Trigger loadShooter;
     public static Trigger unloadShooter;
 
     public static Trigger runIntake;
     public static Trigger reverseIntake;
+    public static Trigger toggleIntakePosition;
 
     public static Trigger sysDyn;
     public static Trigger sysSta;
@@ -70,17 +72,20 @@ public class RobotStates {
 
         endGame = teleop.and(() -> DriverStation.getMatchTime() < 20);
 
-        runShooter = new Trigger(isRightTriggerDown2());
-        reverseShooter = new Trigger(isLeftTriggerDown2());
+        unjamShooter = new Trigger(RobotContainer.shootController.a());
+        primeShooter = new Trigger(isLeftTriggerDown2());
+        fireShooter = new Trigger(isRightTriggerDown2());
 
         
         runIntake = RobotContainer.shootController.rightBumper();
         reverseIntake = RobotContainer.shootController.leftBumper();
+        toggleIntakePosition = RobotContainer.shootController.povDown();
 
 
-        sysDyn = new Trigger(RobotContainer.shootController.x());
+        // PID Stuff
+        /*sysDyn = new Trigger(RobotContainer.shootController.x());
         sysSta = new Trigger(RobotContainer.shootController.y());
         sysDynRev = new Trigger(RobotContainer.shootController.a());
-        sysStaRev = new Trigger(RobotContainer.shootController.b());
+        sysStaRev = new Trigger(RobotContainer.shootController.b());*/
     }
 }

@@ -73,10 +73,8 @@ public class RollerSim implements Mountable {
             rollerAxle.setPosition(config.getInitialX(), config.getInitialY());
         }
 
-        // Scale down the angular velocity so we can actually see what is happening
-        double rpm = rollerSim.getAngularVelocityRPM() / 2;
-        rollerViz.setAngle(
-                rollerViz.getAngle() + Math.toDegrees(rpm) * TimedRobot.kDefaultPeriod * 0.1);
+        double rpm = rollerSim.getAngularVelocityRPM();
+        rollerViz.setAngle(rollerViz.getAngle() + rpm * 360.0 * TimedRobot.kDefaultPeriod / 60.0);
 
         if (rollerSim.getAngularVelocityRadPerSec() < -1) {
             roller.setHalfBackground(config.getRevColor(), config.getOffColor());

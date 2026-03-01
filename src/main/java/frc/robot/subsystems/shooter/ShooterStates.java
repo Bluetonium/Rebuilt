@@ -8,9 +8,10 @@ public class ShooterStates {
     private static Shooter shooter = RobotContainer.getShooter();
 
     public static void setupStates() {
-        RobotStates.runShooter.whileTrue(shooter.runForward());
-        RobotStates.reverseShooter.whileTrue(shooter.runBackward());
+        RobotStates.unjamShooter.whileTrue(shooter.unjamShooter());
 
+        RobotStates.primeShooter.and(RobotStates.fireShooter.negate()).whileTrue(shooter.runFlywheel());
+        RobotStates.fireShooter.whileTrue(shooter.runFlywheelAndLoader());
 
 
         //Triggers to get PID values and whatnot
