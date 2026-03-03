@@ -15,7 +15,7 @@ public class ShooterConstants {
         // Flywheel Lead (X60)
         //-----------------------------
 
-        public static final double FLYWHEEL_ACCELERATION = 60;
+        public static final double FLYWHEEL_ACCELERATION = 20;
         public static double FLYWHEEL_TARGET_VELOCITY = 0;
         public static double FLYWHEEL_VELOCITY_THRESHOLD = 2;
         public static  InvertedValue FLYWHEEL_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
@@ -40,20 +40,20 @@ public class ShooterConstants {
                         .setSimMOI(0.00005);
 
         //PID values
-        public static final double kP_flywheel = 0.030071;
+        public static final double kP_flywheel = 0.054237;
         public static final double kI_flywheel = 0;
         public static final double kD_flywheel = 0;
 
-        public static final double kS_flywheel = 0.17242;
-        public static final double kV_flywheel = 0.12144;
-        public static final double kA_flywheel = 0.0032487;
+        public static final double kS_flywheel = 0.15735;
+        public static final double kV_flywheel = 0.11918;
+        public static final double kA_flywheel = 0.004995;
 
         //-----------------------------
         // Flywheel Follower (X60)
         //-----------------------------
 
         //can id
-        public static final int FLYWHEEL_FOLLOWER_MOTOR_CAN_ID = 16;
+        public static final int FLYWHEEL_FOLLOWER_MOTOR_CAN_ID = 17;
 
         //simulator stuff
         public static RollerSim FLYWHEEL_MOTOR_FOLLOWER_SIM;
@@ -68,12 +68,12 @@ public class ShooterConstants {
         // Loader Motor (X44)
         //-----------------------------
 
-        public static final double LOADER_ACCELERATION = 90;
-        public static final double LOADER_FORWARD_VELOCITY = -10;
+        public static final double LOADER_ACCELERATION = 30;
+        public static final double LOADER_FORWARD_VELOCITY = 50;
         public static  InvertedValue LOADER_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         //can id
-        public static final int LOADER_MOTOR_CAN_ID = 27;
+        public static final int LOADER_MOTOR_CAN_ID = 19;
         public static final NeutralModeValue LOADER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
 
         //current limits
@@ -90,13 +90,13 @@ public class ShooterConstants {
                         .setPosition(1, .5);
 
         //PID values
-        public static final double kP_loader = 0.038024;
+        public static final double kP_loader = 0.024619;
         public static final double kI_loader = 0;
         public static final double kD_loader = 0;
 
-        public static final double kS_loader = 0.079022;
-        public static final double kV_loader = 0.12114;
-        public static final double kA_loader = 0.0028202;
+        public static final double kS_loader = 0.495;
+        public static final double kV_loader = 0.10723;
+        public static final double kA_loader = 0.0035311;
 
         //-----------------------------
         // Transfer Motor (X44)
@@ -107,7 +107,7 @@ public class ShooterConstants {
         public static  InvertedValue TRANSFER_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         //can id
-        public static final int TRANSFER_MOTOR_CAN_ID = 34;
+        public static final int TRANSFER_MOTOR_CAN_ID = 21;
         public static final NeutralModeValue TRANSFER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
 
         //current limits

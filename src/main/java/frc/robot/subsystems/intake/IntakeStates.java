@@ -13,12 +13,12 @@ public class IntakeStates {
         RobotStates.reverseIntake.whileTrue(intake.runBackward());
         RobotStates.toggleIntakePosition.onTrue(intake.toggleAngle(90, 00));
 
-        /* 
-        RobotStates.sysDyn.whileTrue(intake.sysIdDynamic(Direction.kForward));
-        RobotStates.sysSta.whileTrue(intake.sysIdQuasistatic(Direction.kForward));
-        RobotStates.sysDynRev.whileTrue(intake.sysIdDynamic(Direction.kReverse));
-        RobotStates.sysStaRev.whileTrue(intake.sysIdQuasistatic(Direction.kReverse));
-        */
+         
+        //RobotStates.sysDyn.whileTrue(intake.intakeSysIdDynamic(Direction.kForward));
+        //RobotStates.sysSta.whileTrue(intake.intakeSysIdQuasistatic(Direction.kForward));
+        //RobotStates.sysDynRev.whileTrue(intake.intakeSysIdDynamic(Direction.kReverse));
+        //RobotStates.sysStaRev.whileTrue(intake.intakeSysIdQuasistatic(Direction.kReverse));
+        
     }
 
     

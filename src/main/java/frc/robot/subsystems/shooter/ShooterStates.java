@@ -14,13 +14,13 @@ public class ShooterStates {
         RobotStates.fireShooter.whileTrue(shooter.runFlywheelAndLoader());
 
 
-        //Triggers to get PID values and whatnot
-        /* 
-        RobotStates.sysDyn.whileTrue(shooter.sysIdDynamic(Direction.kForward));
-        RobotStates.sysSta.whileTrue(shooter.sysIdQuasistatic(Direction.kForward));
-        RobotStates.sysDynRev.whileTrue(shooter.sysIdDynamic(Direction.kReverse));
-        RobotStates.sysStaRev.whileTrue(shooter.sysIdQuasistatic(Direction.kReverse));
-        */
+        
+        
+        RobotStates.sysDyn.whileTrue(shooter.flywheelSysIdDynamic(Direction.kForward));
+        RobotStates.sysSta.whileTrue(shooter.flywheelSysIdQuasistatic(Direction.kForward));
+        RobotStates.sysDynRev.whileTrue(shooter.flywheelSysIdDynamic(Direction.kReverse));
+        RobotStates.sysStaRev.whileTrue(shooter.flywheelSysIdQuasistatic(Direction.kReverse));
+        
         
     }
 

@@ -165,7 +165,7 @@ public class Shooter extends SubsystemBase {
         
         applyConfig();
 
-        flywheelFollowerMotor.setControl(new Follower(ShooterConstants.FLYWHEEL_LEAD_MOTOR_CAN_ID, MotorAlignmentValue.Aligned));
+        flywheelFollowerMotor.setControl(new Follower(ShooterConstants.FLYWHEEL_LEAD_MOTOR_CAN_ID, MotorAlignmentValue.Opposed));
 
         ShooterConstants.FLYWHEEL_MOTOR_LEAD_SIM = new RollerSim(ShooterConstants.FLYWHEEL_MOTOR_LEAD_SIM_CONFIG, RobotSim.rightView, flywheelLeadMotor.getSimState(), "Flywheel Lead Motor");
         ShooterConstants.FLYWHEEL_MOTOR_FOLLOWER_SIM = new RollerSim(ShooterConstants.FLYWHEEL_MOTOR_FOLLOWER_SIM_CONFIG, RobotSim.rightView, flywheelFollowerMotor.getSimState(), "Flywheel Follower Motor");
@@ -288,24 +288,25 @@ public class Shooter extends SubsystemBase {
             flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_TARGET_VELOCITY));
             if (atTargetSpeed()) {
                 loaderMotor.setControl(loaderVelocityVoltage.withVelocity(ShooterConstants.LOADER_FORWARD_VELOCITY));
-                transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
+                //transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
             } else {
                 loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
-                transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+                //transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
             }
         }).finallyDo(() -> {
             flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
             loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
-            transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+            //transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
         }).withName("ShooterAndLoaderForward");
     }
 
     @Override
     public void periodic() {
-        ShooterConstants.FLYWHEEL_TARGET_VELOCITY += 0.2;
-        if(ShooterConstants.FLYWHEEL_TARGET_VELOCITY > 50) {
+        /*ShooterConstants.FLYWHEEL_TARGET_VELOCITY += 0.1;
+        if(ShooterConstants.FLYWHEEL_TARGET_VELOCITY > 5) {
             ShooterConstants.FLYWHEEL_TARGET_VELOCITY = 0;
-        }
+        }*/
+        ShooterConstants.FLYWHEEL_TARGET_VELOCITY = 70;
         flywheelLeadMotor.getSimState().setSupplyVoltage(12);
     }
 

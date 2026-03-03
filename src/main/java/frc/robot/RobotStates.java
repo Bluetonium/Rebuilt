@@ -83,9 +83,9 @@ public class RobotStates {
 
 
         // PID Stuff
-        /*sysDyn = new Trigger(RobotContainer.shootController.x());
+        sysDyn = new Trigger(RobotContainer.shootController.x());
         sysSta = new Trigger(RobotContainer.shootController.y());
-        sysDynRev = new Trigger(RobotContainer.shootController.a());
-        sysStaRev = new Trigger(RobotContainer.shootController.b());*/
+        sysDynRev = new Trigger(RobotContainer.shootController.povRight());
+        sysStaRev = new Trigger(RobotContainer.shootController.b());
     }
 }
