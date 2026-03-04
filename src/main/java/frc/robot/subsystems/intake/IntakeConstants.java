@@ -14,7 +14,7 @@ public class IntakeConstants {
     //-----------------------------
 
     public static final double INTAKE_DROPPER_ACCELERATION = 1.5;
-    public static final double INTAKE_DROPPER_CRUISE_VELOCITY = 0.75; // rotations/sec of mechanism
+    public static final double INTAKE_DROPPER_CRUISE_VELOCITY = 1; // rotations/sec of mechanism
     public static final double INTAKE_DROPPER_GEAR_RATIO = 81;
     public static final double INTAKE_DROPPER_INITIAL_ANGLE = 90.0;
 

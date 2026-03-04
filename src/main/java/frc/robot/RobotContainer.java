@@ -9,7 +9,9 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -34,6 +36,9 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
+    new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -43,6 +48,7 @@ public class RobotContainer {
     public final static CommandXboxController pidController = new CommandXboxController(3);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    
 
     @Getter
     private static Shooter shooter;
@@ -70,6 +76,9 @@ public class RobotContainer {
             )
         );
 
+        driveAtAngle.HeadingController.setPID(9, 0, 0);
+        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
@@ -84,10 +93,10 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        chassisController.back().and(chassisController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        /*chassisController.back().and(chassisController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         chassisController.back().and(chassisController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         chassisController.start().and(chassisController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        chassisController.start().and(chassisController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        chassisController.start().and(chassisController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));*/
 
         // Reset the field-centric heading on left bumper press.
         chassisController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
@@ -100,10 +109,28 @@ public class RobotContainer {
         chassisController.rightBumper().onFalse(drivetrain.runOnce(()->{
             MaxSpeed= 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
-        
         }));
 
+        chassisController.rightTrigger().whileTrue(drivetrain.applyRequest(() ->
+            driveAtAngle
+                .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
+                .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
+                .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub()))
+        ));
+
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+
+
+    public double getAngleToHub() {
+        Pose2d robotPose = drivetrain.getState().Pose;
+        Translation2d robotPos = robotPose.getTranslation();
+
+        double dx = 4.625 - robotPos.getX(); // long axis
+        double dy = 4.034 - robotPos.getY();
+
+        return Math.toDegrees(Math.atan2(dy, dx)) + 180;
     }
 
     public Command getAutonomousCommand() {
