@@ -329,7 +329,7 @@ public class Shooter extends SubsystemBase {
 
     private static final InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
     private static double staticShooterVelocity = 55;
-    private static boolean useStaticVelocity = true;
+    private static boolean useStaticVelocity = false;
 
     static {
         shooterMap.put(1.0, 0.0);

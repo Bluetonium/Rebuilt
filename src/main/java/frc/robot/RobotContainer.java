@@ -168,20 +168,37 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // Simple drive forward auton
         final var idle = new SwerveRequest.Idle();
+
+        // make it work moving backwards from the auton start line
+        // figure out whether velocity is relative to robot position or absolute world coordinates
+        // shooter starts at negative velocity?
+
+        boolean isRed = DriverStation.isFMSAttached()
+            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+            : NetworkTableInstance.getDefault()
+                .getTable("FMSInfo")
+                .getEntry("IsRedAlliance")
+                .getBoolean(false);
+        
         return Commands.sequence(
-            // Reset our field centric heading to match the robot
-            // facing away from our alliance station wall (0 deg).
-            drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-            // Then slowly drive forward (away from us) for 5 seconds.
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(0.5)
+                drive.withVelocityX(isRed ? -1 : 1)
                     .withVelocityY(0)
                     .withRotationalRate(0)
             )
-            .withTimeout(5.0),
-            // Finally idle for the rest of auton
+            .withTimeout(1.0),
+            
+            drivetrain.applyRequest(() ->
+                driveAtAngle
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub()))
+            )
+            .withTimeout(4.0),
+
+            shooter.runFlywheelAndLoader().withTimeout(14.0),
+
             drivetrain.applyRequest(() -> idle)
         );
     }
