@@ -2,6 +2,8 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -13,6 +15,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,6 +39,8 @@ public class Shooter extends SubsystemBase {
 
     private TalonFX loaderMotor;
     private TalonFX transferMotor;
+
+    private DoubleSupplier distanceSupplier;
 
     
     private final VoltageOut flywheelSysIdControl = new VoltageOut(0);
@@ -97,8 +102,20 @@ public class Shooter extends SubsystemBase {
                 this));
 
 
-    public Shooter() {
+     private final SysIdRoutine transferSysIdRoutine = new SysIdRoutine(
+        new SysIdRoutine.Config(
+                null,        // Use default ramp rate (1 V/s)
+                Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+                null,        // Use default timeout (10 s)
+                (state) -> SignalLogger.writeString("SysIdTransfer", state.toString())),
+        new SysIdRoutine.Mechanism(
+                (volts) -> transferMotor.setControl(transferSysIdControl.withOutput(volts.in(Volts))),
+                null,
+                this));
+
+    public Shooter(DoubleSupplier distanceSupplier) {
         // Flywheel Setup
+        this.distanceSupplier = distanceSupplier;
 
         flywheelLeadMotor = new TalonFX(ShooterConstants.FLYWHEEL_LEAD_MOTOR_CAN_ID);
         flywheelLeadMotor.setNeutralMode(ShooterConstants.FLYWHEEL_MOTOR_NEUTRAL_MODE);
@@ -236,12 +253,22 @@ public class Shooter extends SubsystemBase {
         return flywheelSysIdRoutine.dynamic(direction);
     }
 
+
     public Command loaderSysIdQuasistatic(SysIdRoutine.Direction direction) {
         return loaderSysIdRoutine.quasistatic(direction);
     }
 
     public Command loaderSysIdDynamic(SysIdRoutine.Direction direction) {
         return loaderSysIdRoutine.dynamic(direction);
+    }
+
+
+    public Command transferSysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return transferSysIdRoutine.quasistatic(direction);
+    }
+
+    public Command transferSysIdDynamic(SysIdRoutine.Direction direction) {
+        return transferSysIdRoutine.dynamic(direction);
     }
 
     // In the final version this should have 2 motors + 3 commands
@@ -288,25 +315,37 @@ public class Shooter extends SubsystemBase {
             flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_TARGET_VELOCITY));
             if (atTargetSpeed()) {
                 loaderMotor.setControl(loaderVelocityVoltage.withVelocity(ShooterConstants.LOADER_FORWARD_VELOCITY));
-                //transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
+                transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
             } else {
                 loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
-                //transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+                transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
             }
         }).finallyDo(() -> {
             flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
             loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
-            //transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+            transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
         }).withName("ShooterAndLoaderForward");
+    }
+
+    private static final InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
+    private static double staticShooterVelocity = 55;
+    private static boolean useStaticVelocity = true;
+
+    static {
+        shooterMap.put(1.0, 0.0);
+        shooterMap.put(8.0, 5.0);
     }
 
     @Override
     public void periodic() {
-        /*ShooterConstants.FLYWHEEL_TARGET_VELOCITY += 0.1;
-        if(ShooterConstants.FLYWHEEL_TARGET_VELOCITY > 5) {
-            ShooterConstants.FLYWHEEL_TARGET_VELOCITY = 0;
-        }*/
-        ShooterConstants.FLYWHEEL_TARGET_VELOCITY = 70;
+        if(useStaticVelocity) {
+            ShooterConstants.FLYWHEEL_TARGET_VELOCITY = staticShooterVelocity;
+        } else {
+            double distance = distanceSupplier.getAsDouble();
+            ShooterConstants.FLYWHEEL_TARGET_VELOCITY = shooterMap.get(distance);
+            System.out.print(ShooterConstants.FLYWHEEL_TARGET_VELOCITY);
+        }
+
         flywheelLeadMotor.getSimState().setSupplyVoltage(12);
     }
 

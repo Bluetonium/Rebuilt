@@ -68,8 +68,8 @@ public class ShooterConstants {
         // Loader Motor (X44)
         //-----------------------------
 
-        public static final double LOADER_ACCELERATION = 30;
-        public static final double LOADER_FORWARD_VELOCITY = 50;
+        public static final double LOADER_ACCELERATION = 45;
+        public static final double LOADER_FORWARD_VELOCITY = 75;
         public static  InvertedValue LOADER_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         //can id
@@ -102,8 +102,8 @@ public class ShooterConstants {
         // Transfer Motor (X44)
         //-----------------------------
 
-        public static final double TRANSFER_ACCELERATION = 90;
-        public static final double TRANSFER_FORWARD_VELOCITY = -10;
+        public static final double TRANSFER_ACCELERATION = 30;
+        public static final double TRANSFER_FORWARD_VELOCITY = -50;
         public static  InvertedValue TRANSFER_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         //can id
@@ -124,11 +124,11 @@ public class ShooterConstants {
                         .setPosition(1.3, .5);
 
         //PID values
-        public static final double kP_transfer = 0.038024;
+        public static final double kP_transfer = 0.12258;
         public static final double kI_transfer = 0;
         public static final double kD_transfer = 0;
 
-        public static final double kS_transfer = 0.079022;
-        public static final double kV_transfer = 0.12114;
-        public static final double kA_transfer = 0.0028202;
+        public static final double kS_transfer = 1.2135;
+        public static final double kV_transfer = 0.069086;
+        public static final double kA_transfer = 0.46091;
 }

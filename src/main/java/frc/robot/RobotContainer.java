@@ -12,6 +12,9 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -86,7 +89,8 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        chassisController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // Break
+        chassisController.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
         chassisController.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-chassisController.getLeftY(), -chassisController.getLeftX()))
         ));
@@ -98,19 +102,22 @@ public class RobotContainer {
         chassisController.start().and(chassisController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         chassisController.start().and(chassisController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));*/
 
-        // Reset the field-centric heading on left bumper press.
-        chassisController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-        chassisController.rightBumper().onTrue(drivetrain.runOnce(()-> 
+        // Reset the field-centric heading on right bumper press.
+        chassisController.a().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        // Slowmode
+        chassisController.leftTrigger().onTrue(drivetrain.runOnce(()-> 
         { 
             MaxSpeed= 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
 
         }));
-        chassisController.rightBumper().onFalse(drivetrain.runOnce(()->{
+        chassisController.leftTrigger().onFalse(drivetrain.runOnce(()->{
             MaxSpeed= 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed*0.1);
         }));
 
+        // Autoaim
         chassisController.rightTrigger().whileTrue(drivetrain.applyRequest(() ->
             driveAtAngle
                 .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
@@ -121,16 +128,43 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-
+    // im tired of having only dry water and wet rice
 
     public double getAngleToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        double dx = 4.625 - robotPos.getX(); // long axis
+        boolean isRed = DriverStation.isFMSAttached()
+            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+            : NetworkTableInstance.getDefault()
+                .getTable("FMSInfo")
+                .getEntry("IsRedAlliance")
+                .getBoolean(false);
+
+        double targetX = isRed ? 11.9167 : 4.625;
+
+        double dx = targetX - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
         return Math.toDegrees(Math.atan2(dy, dx)) + 180;
+    }
+
+    public double getDistanceToHub() {
+        Pose2d robotPose = drivetrain.getState().Pose;
+        Translation2d robotPos = robotPose.getTranslation();
+
+        boolean isRed = DriverStation.isFMSAttached()
+            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+            : NetworkTableInstance.getDefault()
+                .getTable("FMSInfo")
+                .getEntry("IsRedAlliance")
+                .getBoolean(false);
+
+        double targetX = isRed ? 11.9167 : 4.625;
+        double dx = targetX - robotPos.getX();
+        double dy = 4.034 - robotPos.getY();
+
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     public Command getAutonomousCommand() {
@@ -153,7 +187,7 @@ public class RobotContainer {
     }
 
     private void initializeSubsystems() {
-        shooter = new Shooter();
+        shooter = new Shooter(this::getDistanceToHub);
         intake = new Intake();
     }
 

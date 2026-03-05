@@ -16,10 +16,10 @@ public class ShooterStates {
 
         
         
-        RobotStates.sysDyn.whileTrue(shooter.flywheelSysIdDynamic(Direction.kForward));
-        RobotStates.sysSta.whileTrue(shooter.flywheelSysIdQuasistatic(Direction.kForward));
-        RobotStates.sysDynRev.whileTrue(shooter.flywheelSysIdDynamic(Direction.kReverse));
-        RobotStates.sysStaRev.whileTrue(shooter.flywheelSysIdQuasistatic(Direction.kReverse));
+        RobotStates.sysDyn.whileTrue(shooter.transferSysIdDynamic(Direction.kForward));
+        RobotStates.sysSta.whileTrue(shooter.transferSysIdQuasistatic(Direction.kForward));
+        RobotStates.sysDynRev.whileTrue(shooter.transferSysIdDynamic(Direction.kReverse));
+        RobotStates.sysStaRev.whileTrue(shooter.transferSysIdQuasistatic(Direction.kReverse));
         
         
     }
