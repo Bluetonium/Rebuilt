@@ -22,9 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.shooter.Shooter;
-
+import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
 
 import lombok.Getter;
@@ -40,7 +40,7 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
-    new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
+    new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -79,7 +79,7 @@ public class RobotContainer {
             )
         );
 
-        driveAtAngle.HeadingController.setPID(9, 0, 0);
+        driveAtAngle.HeadingController.setPID(2, 0, 0.1);
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Idle while the robot is disabled. This ensures the configured
@@ -146,7 +146,7 @@ public class RobotContainer {
         double dx = targetX - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
-        return Math.toDegrees(Math.atan2(dy, dx)) + 180;
+        return ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
     }
 
     public double getDistanceToHub() {
@@ -183,17 +183,17 @@ public class RobotContainer {
         
         return Commands.sequence(
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(isRed ? -1 : 1)
+                drive.withVelocityX(isRed ? 1 : -1)
                     .withVelocityY(0)
                     .withRotationalRate(0)
             )
-            .withTimeout(1.0),
+            .withTimeout(1.15),
             
             drivetrain.applyRequest(() ->
                 driveAtAngle
                     .withVelocityX(0)
                     .withVelocityY(0)
-                    .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub()))
+                    .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub() + 180))
             )
             .withTimeout(4.0),
 

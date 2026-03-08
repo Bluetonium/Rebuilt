@@ -40,6 +40,7 @@ public class RobotStates {
     public static Trigger unjamShooter; // unjam 
     public static Trigger fireShooter; // prime, then start lauching balls
     public static Trigger primeShooter; // only prime
+    public static Trigger fireShooterConstantVelocity; // only prime
 
     public static Trigger loadShooter;
     public static Trigger unloadShooter;
@@ -75,7 +76,7 @@ public class RobotStates {
         unjamShooter = new Trigger(RobotContainer.shootController.a());
         primeShooter = new Trigger(isLeftTriggerDown2());
         fireShooter = new Trigger(isRightTriggerDown2());
-
+        fireShooterConstantVelocity = new Trigger(RobotContainer.shootController.x());
         
         runIntake = RobotContainer.shootController.rightBumper();
         reverseIntake = RobotContainer.shootController.leftBumper();

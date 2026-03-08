@@ -50,9 +50,9 @@ public class IntakeConstants {
     // Intake roller (X44)
     //-----------------------------
 
-    public static final double INTAKE_ACCELERATION = 30;
-    public static final double INTAKE_FORWARD_VELOCITY = 50;
-    public static final double INTAKE_BACKWARD_VELOCITY = -50;
+    public static final double INTAKE_ACCELERATION = 60;
+    public static final double INTAKE_FORWARD_VELOCITY = 70;
+    public static final double INTAKE_BACKWARD_VELOCITY = -70;
     public static final double INTAKE_GEAR_RATIO = 1;
 
     public static final int INTAKE_MOTOR_CAN_ID = 18;

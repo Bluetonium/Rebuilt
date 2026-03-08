@@ -11,15 +11,14 @@ public class ShooterStates {
         RobotStates.unjamShooter.whileTrue(shooter.unjamShooter());
 
         RobotStates.primeShooter.and(RobotStates.fireShooter.negate()).whileTrue(shooter.runFlywheel());
-        RobotStates.fireShooter.whileTrue(shooter.runFlywheelAndLoader());
+        RobotStates.fireShooter.whileTrue(shooter.runFlywheelAndLoader());        
 
-
+        RobotStates.fireShooterConstantVelocity.whileTrue(shooter.constantVelocityRunFlywheelAndLoader());        
         
-        
-        RobotStates.sysDyn.whileTrue(shooter.transferSysIdDynamic(Direction.kForward));
+        /*RobotStates.sysDyn.whileTrue(shooter.transferSysIdDynamic(Direction.kForward));
         RobotStates.sysSta.whileTrue(shooter.transferSysIdQuasistatic(Direction.kForward));
         RobotStates.sysDynRev.whileTrue(shooter.transferSysIdDynamic(Direction.kReverse));
-        RobotStates.sysStaRev.whileTrue(shooter.transferSysIdQuasistatic(Direction.kReverse));
+        RobotStates.sysStaRev.whileTrue(shooter.transferSysIdQuasistatic(Direction.kReverse));*/
         
         
     }

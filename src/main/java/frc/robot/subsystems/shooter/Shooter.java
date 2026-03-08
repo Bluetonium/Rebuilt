@@ -327,13 +327,32 @@ public class Shooter extends SubsystemBase {
         }).withName("ShooterAndLoaderForward");
     }
 
+    public Command constantVelocityRunFlywheelAndLoader() {
+        return run(() -> {
+            flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(staticShooterVelocity));
+            if (atConstantTargetSpeed()) {
+                loaderMotor.setControl(loaderVelocityVoltage.withVelocity(ShooterConstants.LOADER_FORWARD_VELOCITY));
+                transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
+            } else {
+                loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
+                transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+            }
+        }).finallyDo(() -> {
+            flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
+            loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
+            transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+        }).withName("ConstantVelocityShooterAndLoaderForward");
+    }
+
     private static final InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
-    private static double staticShooterVelocity = 55;
+    private static double staticShooterVelocity = 79;
     private static boolean useStaticVelocity = false;
 
     static {
-        shooterMap.put(1.0, 0.0);
-        shooterMap.put(8.0, 5.0);
+        shooterMap.put(2.328, 60.0);
+        shooterMap.put(3.037, 65.0);
+        shooterMap.put(3.575, 70.0);
+        shooterMap.put(4.103, 80.0);
     }
 
     @Override
@@ -343,7 +362,6 @@ public class Shooter extends SubsystemBase {
         } else {
             double distance = distanceSupplier.getAsDouble();
             ShooterConstants.FLYWHEEL_TARGET_VELOCITY = shooterMap.get(distance);
-            System.out.print(ShooterConstants.FLYWHEEL_TARGET_VELOCITY);
         }
 
         flywheelLeadMotor.getSimState().setSupplyVoltage(12);
@@ -351,5 +369,9 @@ public class Shooter extends SubsystemBase {
 
     public boolean atTargetSpeed() {
         return Math.abs(flywheelLeadMotor.getVelocity().getValueAsDouble() - ShooterConstants.FLYWHEEL_TARGET_VELOCITY) <= ShooterConstants.FLYWHEEL_VELOCITY_THRESHOLD;
+    }
+
+    public boolean atConstantTargetSpeed() {
+        return Math.abs(flywheelLeadMotor.getVelocity().getValueAsDouble() - staticShooterVelocity) <= ShooterConstants.FLYWHEEL_VELOCITY_THRESHOLD;
     }
 }
