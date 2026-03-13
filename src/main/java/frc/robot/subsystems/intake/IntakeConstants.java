@@ -13,8 +13,8 @@ public class IntakeConstants {
     // Intake dropper arm (X60)
     //-----------------------------
 
-    public static final double INTAKE_DOWN_ANGLE = 90.0;
-    public static final double INTAKE_UP_ANGLE = 0.0;
+    public static final double INTAKE_DOWN_ANGLE = 0.0;
+    public static final double INTAKE_UP_ANGLE = 90.0;
 
     public static final double INTAKE_DROPPER_ACCELERATION = 1.5;
     public static final double INTAKE_DROPPER_CRUISE_VELOCITY = 1; // rotations/sec of mechanism

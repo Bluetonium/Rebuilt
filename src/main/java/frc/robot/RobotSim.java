@@ -13,6 +13,7 @@ public class RobotSim {
             Units.inchesToMeters(height));
 
     public RobotSim() {
+        
         SmartDashboard.putData("RightView", rightView);
         rightView.setBackgroundColor(new Color8Bit(Color.kLightGray));
     }

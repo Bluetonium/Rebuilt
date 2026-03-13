@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -15,6 +16,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -54,6 +59,10 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private final SendableChooser<Command> autoChooser;
+    @Getter
+    private static Command currentAuto;
+
     private boolean isRed() {
         return DriverStation.isFMSAttached()
             ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
@@ -76,9 +85,13 @@ public class RobotContainer {
     public RobotContainer() {
         initializeSubsystems();
         RobotStates.setupStates();
-
         configureBindings();
         setupSubsystems();
+
+        autoChooser = AutoBuilder.buildAutoChooser();
+        currentAuto = autoChooser.getSelected();
+        autoChooser.onChange((command) -> currentAuto = command);
+        SmartDashboard.putData("Autonomous", autoChooser);
     }
 
     private void configureBindings() {
@@ -103,11 +116,11 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        // Break
-        chassisController.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
-        chassisController.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-chassisController.getLeftY(), -chassisController.getLeftX()))
-        ));
+        // Brake
+        RobotStates.brake.whileTrue(drivetrain.applyRequest(() -> brake));
+        // chassisController.b().whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-chassisController.getLeftY(), -chassisController.getLeftX()))
+        // ));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -117,10 +130,10 @@ public class RobotContainer {
         chassisController.start().and(chassisController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));*/
 
         // Reset the field-centric heading on right bumper press.
-        chassisController.a().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        RobotStates.resetHeading.onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Slowmode
-        chassisController.leftTrigger().whileTrue(drivetrain.runOnce(() -> {
+        RobotStates.slowMode.whileTrue(drivetrain.runOnce(() -> {
             MaxSpeed = 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             drive.withDeadband(MaxSpeed * 0.1);
         }).andThen(Commands.idle(drivetrain)).finallyDo(() -> {
@@ -129,20 +142,19 @@ public class RobotContainer {
         }));
 
         // Autoaim
-        chassisController.rightTrigger().whileTrue(drivetrain.applyRequest(() ->
+        RobotStates.autoAim.whileTrue(drivetrain.applyRequest(() ->
             driveAtAngle
                 .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
                 .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
                 .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub()))
         ));
 
-        chassisController.povRight().onTrue(toggleHubPosition());
+        RobotStates.toggleHubPosition.onTrue(toggleHubPosition());
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     // im tired of having only dry water and wet rice
-
     public double getAngleToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
@@ -160,8 +172,6 @@ public class RobotContainer {
         return !isRed() && DriverStation.isTeleopEnabled() ? angle + 180 : angle;
     }
 
-
-
     public double getDistanceToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
@@ -173,32 +183,33 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        final var idle = new SwerveRequest.Idle();
+        return currentAuto;
+        // final var idle = new SwerveRequest.Idle();
 
-        // make it work moving backwards from the   vvauton start line
-        // figure out whether velocity is relative to robot position or absolute world coordinates
-        // shooter starts at negative velocity?
+        // // make it work moving backwards from the   vvauton start line
+        // // figure out whether velocity is relative to robot position or absolute world coordinates
+        // // shooter starts at negative velocity?
         
-        return Commands.sequence(
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(isRed() ? 1 : -1)
-                    .withVelocityY(0)
-                    .withRotationalRate(0)
-            )
-            .withTimeout(1.15),
+        // return Commands.sequence(
+        //     drivetrain.applyRequest(() ->
+        //         drive.withVelocityX(isRed() ? 1 : -1)
+        //             .withVelocityY(0)
+        //             .withRotationalRate(0)
+        //     )
+        //     .withTimeout(1.15),
             
-            drivetrain.applyRequest(() ->
-                driveAtAngle
-                    .withVelocityX(0)
-                    .withVelocityY(0)
-                    .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub() + 180))
-            )
-            .withTimeout(4.0),
+        //     drivetrain.applyRequest(() ->
+        //         driveAtAngle
+        //             .withVelocityX(0)
+        //             .withVelocityY(0)
+        //             .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub() + 180))
+        //     )
+        //     .withTimeout(4.0),
 
-            shooter.runFlywheelAndLoader().withTimeout(14.0),
+        //     shooter.runFlywheelAndLoader().withTimeout(14.0),
 
-            drivetrain.applyRequest(() -> idle)
-        );
+        //     drivetrain.applyRequest(() -> idle)
+        // );
     }
 
     private void initializeSubsystems() {
@@ -208,7 +219,6 @@ public class RobotContainer {
 
     private void setupSubsystems() {
         shooter.setup();
-        
         intake.setup();
     }
 
