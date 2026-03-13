@@ -6,16 +6,18 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 import com.pathplanner.lib.auto.AutoBuilder;
-
+import com.pathplanner.lib.auto.NamedCommands;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -88,6 +90,8 @@ public class RobotContainer {
         configureBindings();
         setupSubsystems();
 
+        NamedCommands.registerCommand("align", align());
+
         autoChooser = AutoBuilder.buildAutoChooser();
         currentAuto = autoChooser.getSelected();
         autoChooser.onChange((command) -> currentAuto = command);
@@ -106,7 +110,7 @@ public class RobotContainer {
             )
         );
 
-        driveAtAngle.HeadingController.setPID(2, 0, 0.1);
+        driveAtAngle.HeadingController.setPID(6, 0.02, 0.1);
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Idle while the robot is disabled. This ensures the configured
@@ -142,12 +146,37 @@ public class RobotContainer {
         }));
 
         // Autoaim
-        RobotStates.autoAim.whileTrue(drivetrain.applyRequest(() ->
-            driveAtAngle
-                .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
-                .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
-                .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub()))
-        ));
+        RobotStates.autoAim.whileTrue(
+    drivetrain.applyRequest(() -> {
+
+        Rotation2d target = getAngleToHub();
+        Rotation2d current = drivetrain.getState().Pose.getRotation();
+
+        double error = MathUtil.angleModulus(
+            target.minus(current).getRadians()
+        );
+
+        double turn;
+
+        // if far away, rotate at constant speed
+        if (Math.abs(error) > Math.toRadians(6)) {
+            turn = Math.copySign(4, error);
+        }
+        // if close, use PID for precision
+        else {
+            turn = driveAtAngle.HeadingController.calculate(
+                current.getRadians(),
+                target.getRadians(),
+                Timer.getFPGATimestamp()
+            );
+        }
+
+        return drive
+            .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
+            .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
+            .withRotationalRate(turn);
+    })
+);
 
         RobotStates.toggleHubPosition.onTrue(toggleHubPosition());
 
@@ -155,22 +184,33 @@ public class RobotContainer {
     }
 
     // im tired of having only dry water and wet rice
-    public double getAngleToHub() {
+    // public double getAngleToHub() {
+    //     Pose2d robotPose = drivetrain.getState().Pose;
+    //     Translation2d robotPos = robotPose.getTranslation();
+
+    //     double dx = hubX - robotPos.getX();
+    //     double dy = 4.034 - robotPos.getY();
+
+    //     /*boolean shouldInvert = !isRed && DriverStation.isTeleopEnabled();
+    //     double angle = ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360);
+
+    //     //return ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
+    //     return shouldInvert ? angle - 180 : angle;*/
+        
+    //     double angle = ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
+    //     return !isRed() && DriverStation.isTeleopEnabled() ? angle + 180 : angle;
+    // }
+
+    public Rotation2d getAngleToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
         double dx = hubX - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
-        /*boolean shouldInvert = !isRed && DriverStation.isTeleopEnabled();
-        double angle = ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360);
-
-        //return ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
-        return shouldInvert ? angle - 180 : angle;*/
-        
-        double angle = ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
-        return !isRed() && DriverStation.isTeleopEnabled() ? angle + 180 : angle;
+        return new Rotation2d(dx, dy);
     }
+
 
     public double getDistanceToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
@@ -184,32 +224,6 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return currentAuto;
-        // final var idle = new SwerveRequest.Idle();
-
-        // // make it work moving backwards from the   vvauton start line
-        // // figure out whether velocity is relative to robot position or absolute world coordinates
-        // // shooter starts at negative velocity?
-        
-        // return Commands.sequence(
-        //     drivetrain.applyRequest(() ->
-        //         drive.withVelocityX(isRed() ? 1 : -1)
-        //             .withVelocityY(0)
-        //             .withRotationalRate(0)
-        //     )
-        //     .withTimeout(1.15),
-            
-        //     drivetrain.applyRequest(() ->
-        //         driveAtAngle
-        //             .withVelocityX(0)
-        //             .withVelocityY(0)
-        //             .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub() + 180))
-        //     )
-        //     .withTimeout(4.0),
-
-        //     shooter.runFlywheelAndLoader().withTimeout(14.0),
-
-        //     drivetrain.applyRequest(() -> idle)
-        // );
     }
 
     private void initializeSubsystems() {
@@ -224,5 +238,27 @@ public class RobotContainer {
 
     public Command toggleHubPosition() {
         return Commands.runOnce(() -> hubX = (hubX == 11.9167) ? 4.625 : 11.9167);
+    }
+
+    public Command align() {
+        final var idle = new SwerveRequest.Idle();
+
+        // make it work moving backwards from the   vvauton start line
+        // figure out whether velocity is relative to robot position or absolute world coordinates
+        // shooter starts at negative velocity?
+        
+        return Commands.sequence(
+            drivetrain.applyRequest(() ->
+                driveAtAngle
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withTargetDirection(getAngleToHub())
+            )
+            .withTimeout(5.0),
+
+            shooter.runFlywheelAndLoader().withTimeout(14.0),
+
+            drivetrain.applyRequest(() -> idle)
+        );
     }
 }
