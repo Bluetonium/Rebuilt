@@ -225,4 +225,12 @@ public class Intake extends SubsystemBase{
             m_targetAngle = m_toggleState ? angleB : angleA;
         }).withName("IntakeToggleAngle");
     }
+
+    public Command moveDown() {
+        return Commands.runOnce(() -> m_targetAngle = IntakeConstants.INTAKE_DOWN_ANGLE).withName("IntakeMoveDown");
+    }
+
+    public Command moveUp() {
+        return Commands.runOnce(() -> m_targetAngle = IntakeConstants.INTAKE_UP_ANGLE).withName("IntakeMoveUp");
+    }
 }

@@ -15,7 +15,7 @@ public class ShooterConstants {
         // Flywheel Lead (X60)
         //-----------------------------
 
-        public static final double FLYWHEEL_ACCELERATION = 20;
+        public static final double FLYWHEEL_ACCELERATION = 60;
         public static double FLYWHEEL_TARGET_VELOCITY = 0;
         public static double FLYWHEEL_VELOCITY_THRESHOLD = 2;
         public static  InvertedValue FLYWHEEL_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;

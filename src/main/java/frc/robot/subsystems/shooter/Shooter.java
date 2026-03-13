@@ -310,6 +310,7 @@ public class Shooter extends SubsystemBase {
         }, this).withName("LoaderForward");
     }
 
+    //how come here we do run(() -> { }).finallyDo instead of a new StartEndCommand like above? - kaiden
     public Command runFlywheelAndLoader() {
         return run(() -> {
             flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(ShooterConstants.FLYWHEEL_TARGET_VELOCITY));

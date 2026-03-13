@@ -33,6 +33,8 @@ public class RobotContainer {
     private double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
+    private double hubX;
+                
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -51,7 +53,19 @@ public class RobotContainer {
     public final static CommandXboxController pidController = new CommandXboxController(3);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    
+
+    private boolean isRed() {
+        return DriverStation.isFMSAttached()
+            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+            : NetworkTableInstance.getDefault()
+                .getTable("FMSInfo")
+                .getEntry("IsRedAlliance")
+                .getBoolean(false);
+    }
+
+    public void initHubPosition() {
+        hubX = isRed() ? 11.9167 : 4.625;
+    }
 
     @Getter
     private static Shooter shooter;
@@ -106,15 +120,12 @@ public class RobotContainer {
         chassisController.a().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Slowmode
-        chassisController.leftTrigger().onTrue(drivetrain.runOnce(()-> 
-        { 
-            MaxSpeed= 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-            drive.withDeadband(MaxSpeed*0.1);
-
-        }));
-        chassisController.leftTrigger().onFalse(drivetrain.runOnce(()->{
-            MaxSpeed= 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-            drive.withDeadband(MaxSpeed*0.1);
+        chassisController.leftTrigger().whileTrue(drivetrain.runOnce(() -> {
+            MaxSpeed = 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+            drive.withDeadband(MaxSpeed * 0.1);
+        }).andThen(Commands.idle(drivetrain)).finallyDo(() -> {
+            MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+            drive.withDeadband(MaxSpeed * 0.1);
         }));
 
         // Autoaim
@@ -125,6 +136,8 @@ public class RobotContainer {
                 .withTargetDirection(Rotation2d.fromDegrees(getAngleToHub()))
         ));
 
+        chassisController.povRight().onTrue(toggleHubPosition());
+
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -134,34 +147,26 @@ public class RobotContainer {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        boolean isRed = DriverStation.isFMSAttached()
-            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-            : NetworkTableInstance.getDefault()
-                .getTable("FMSInfo")
-                .getEntry("IsRedAlliance")
-                .getBoolean(false);
-
-        double targetX = isRed ? 11.9167 : 4.625;
-
-        double dx = targetX - robotPos.getX();
+        double dx = hubX - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
-        return ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
+        /*boolean shouldInvert = !isRed && DriverStation.isTeleopEnabled();
+        double angle = ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360);
+
+        //return ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
+        return shouldInvert ? angle - 180 : angle;*/
+        
+        double angle = ((Math.toDegrees(Math.atan2(dy, dx)) + 180 + 180) % 360) - 180;
+        return !isRed() && DriverStation.isTeleopEnabled() ? angle + 180 : angle;
     }
+
+
 
     public double getDistanceToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        boolean isRed = DriverStation.isFMSAttached()
-            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-            : NetworkTableInstance.getDefault()
-                .getTable("FMSInfo")
-                .getEntry("IsRedAlliance")
-                .getBoolean(false);
-
-        double targetX = isRed ? 11.9167 : 4.625;
-        double dx = targetX - robotPos.getX();
+        double dx = hubX - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
         return Math.sqrt(dx * dx + dy * dy);
@@ -170,20 +175,13 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         final var idle = new SwerveRequest.Idle();
 
-        // make it work moving backwards from the auton start line
+        // make it work moving backwards from the   vvauton start line
         // figure out whether velocity is relative to robot position or absolute world coordinates
         // shooter starts at negative velocity?
-
-        boolean isRed = DriverStation.isFMSAttached()
-            ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-            : NetworkTableInstance.getDefault()
-                .getTable("FMSInfo")
-                .getEntry("IsRedAlliance")
-                .getBoolean(false);
         
         return Commands.sequence(
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(isRed ? 1 : -1)
+                drive.withVelocityX(isRed() ? 1 : -1)
                     .withVelocityY(0)
                     .withRotationalRate(0)
             )
@@ -212,5 +210,9 @@ public class RobotContainer {
         shooter.setup();
         
         intake.setup();
+    }
+
+    public Command toggleHubPosition() {
+        return Commands.runOnce(() -> hubX = (hubX == 11.9167) ? 4.625 : 11.9167);
     }
 }

@@ -11,10 +11,13 @@ public class RobotStates {
     public static class DriverConfigs {
         @Setter
         protected static int port = 0;
+
         @Setter
         protected static boolean elevatorControl = false;
+
         @Setter
         protected static boolean chassisDriving = false;
+
         @Setter
         protected static boolean outtakeControl = false;
     }
@@ -47,7 +50,8 @@ public class RobotStates {
 
     public static Trigger runIntake;
     public static Trigger reverseIntake;
-    public static Trigger toggleIntakePosition;
+    public static Trigger intakeDown;
+    public static Trigger intakeUp;
 
     public static Trigger sysDyn;
     public static Trigger sysSta;
@@ -80,8 +84,8 @@ public class RobotStates {
         
         runIntake = RobotContainer.shootController.rightBumper();
         reverseIntake = RobotContainer.shootController.leftBumper();
-        toggleIntakePosition = RobotContainer.shootController.povDown();
-
+        intakeDown = RobotContainer.shootController.povDown();
+        intakeUp = RobotContainer.shootController.povUp();
 
         // PID Stuff
         sysDyn = new Trigger(RobotContainer.shootController.x());
