@@ -58,6 +58,13 @@ public class RobotStates {
     public static Trigger sysDynRev;
     public static Trigger sysStaRev;
 
+    // chassis
+    public static Trigger brake;
+    public static Trigger resetHeading;
+    public static Trigger slowMode;
+    public static Trigger autoAim;
+    public static Trigger toggleHubPosition;
+
     private static BooleanSupplier isRightTriggerDown2() {        
         return () -> RobotContainer.shootController.getRightTriggerAxis() > 0.1;
     }
@@ -92,5 +99,12 @@ public class RobotStates {
         sysSta = new Trigger(RobotContainer.shootController.y());
         sysDynRev = new Trigger(RobotContainer.shootController.povRight());
         sysStaRev = new Trigger(RobotContainer.shootController.b());
+
+        // chassis
+        brake = new Trigger(RobotContainer.chassisController.leftBumper());
+        resetHeading = new Trigger(RobotContainer.chassisController.a());
+        slowMode = new Trigger(RobotContainer.chassisController.leftTrigger());
+        autoAim = new Trigger(RobotContainer.chassisController.rightTrigger());
+        toggleHubPosition = new Trigger(RobotContainer.chassisController.povRight());
     }
 }

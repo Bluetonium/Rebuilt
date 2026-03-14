@@ -7,8 +7,11 @@ package frc.robot;
 import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -17,6 +20,7 @@ public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
+    private final Field2d m_field = new Field2d();
 
     @SuppressWarnings("unused")
     private RobotSim sim;// whoopsy you forgot to make this so the sim doesnt work, i fixed it though C:
@@ -57,6 +61,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        m_robotContainer.drivetrain.seedFieldCentric();
         m_robotContainer.initHubPosition();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -81,10 +86,37 @@ public class Robot extends TimedRobot {
 
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
+        SmartDashboard.putData("Field", m_field);
     }
 
     @Override
     public void teleopPeriodic() {
+        Pose2d pose = m_robotContainer.drivetrain.getState().Pose;
+
+        // update robot position
+        m_field.setRobotPose(pose);
+
+        Translation2d end =
+            pose.getTranslation().plus(
+                new Translation2d(2, pose.getRotation())
+            );
+
+        Translation2d end2 =
+            pose.getTranslation().plus(
+                new Translation2d(4, pose.getRotation())
+            );
+
+        Translation2d end3 =
+            pose.getTranslation().plus(
+                new Translation2d(6, pose.getRotation())
+            );
+
+        m_field.getObject("heading").setPoses(
+            pose,
+            new Pose2d(end, pose.getRotation()),
+            new Pose2d(end2, pose.getRotation()),
+            new Pose2d(end3, pose.getRotation())
+        );
     }
 
     @Override
