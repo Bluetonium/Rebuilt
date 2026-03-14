@@ -87,11 +87,21 @@ public class Robot extends LoggedRobot {
             )
         );
 
-        Pose2d targetPoint = new Pose2d(RobotContainer.getHubX(), 4.034, new Rotation2d());
+        Pose2d targetPose = new Pose2d(frontTranslation, m_robotContainer.autoaim.getAngleToHub());
 
-        Logger.recordOutput("Field/TargetPoint", targetPoint);
-        Logger.recordOutput("Robot/Pose", robotPose);
-        Logger.recordOutput("Robot/Heading", headingTrajectory);
+        Trajectory targetTrajectory = new Trajectory(
+            List.of(
+                new Trajectory.State(0, 0, 0, robotPose, 0),
+                new Trajectory.State(1, 0, 0, targetPose, 0)
+            )
+        );
+
+        Pose2d targetPoint = new Pose2d(m_robotContainer.getHubX(), 4.034, new Rotation2d());
+
+        Logger.recordOutput("Annotations/TargetPoint", targetPoint);
+        Logger.recordOutput("Annotations/Pose", robotPose);
+        Logger.recordOutput("Annotations/Heading", headingTrajectory);
+        Logger.recordOutput("Annotations/targetHeading", targetTrajectory);
     }
 
     @Override
