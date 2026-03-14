@@ -4,19 +4,25 @@
 
 package frc.robot;
 
+import java.util.logging.Logger;
+
+import org.littletonrobotics.junction.LoggedRobot;
+
 import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.SignalLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
@@ -37,6 +43,16 @@ public class Robot extends TimedRobot {
 
         SendableRegistry.add(CommandScheduler.getInstance(),"Command Scheduler");
         SmartDashboard.putData(CommandScheduler.getInstance());
+
+        // Logger.recordMetadata("ProjectName", "MyProject");
+        // Logger.start();
+    }
+
+    @Override
+    public void robotInit() {
+        DataLogManager.start();
+        DriverStation.startDataLog(DataLogManager.getLog());
+        // Logger.recordOutput("RobotPose", m_robotContainer.drivetrain.getPose());
     }
 
     @Override

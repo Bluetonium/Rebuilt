@@ -400,6 +400,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             new SwerveRequest.ApplyRobotSpeeds()
                 .withSpeeds(speeds)
         );
+    }
+
     private void updateLimelightPoseForCameraMT2(String cameraName) {
         LimelightHelpers.SetRobotOrientation(
             cameraName,
