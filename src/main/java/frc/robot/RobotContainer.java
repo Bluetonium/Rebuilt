@@ -119,14 +119,13 @@ public class RobotContainer {
         // Reset the field-centric heading on right bumper press.
         chassisController.a().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        // Slowmode
-        chassisController.leftTrigger().whileTrue(drivetrain.runOnce(() -> {
-            MaxSpeed = 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-            drive.withDeadband(MaxSpeed * 0.1);
-        }).andThen(Commands.idle(drivetrain)).finallyDo(() -> {
-            MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-            drive.withDeadband(MaxSpeed * 0.1);
-        }));
+        chassisController.leftTrigger().whileTrue(
+            Commands.startEnd(
+                () -> MaxSpeed = 0.2 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+                () -> MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)
+                // ← no subsystem passed here, so no requirements
+            )
+        );
 
         // Autoaim
         chassisController.rightTrigger().whileTrue(drivetrain.applyRequest(() ->
