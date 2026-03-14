@@ -292,8 +292,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        updateLimelightPoseForCamera("limelight-front");
-        updateLimelightPoseForCamera("limelight-back");
+        updateLimelightPoseForCamera("limelight-forward");
+        updateLimelightPoseForCamera("limelight-backk");
+
     }
 
     private void startSimThread() {
@@ -399,5 +400,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             new SwerveRequest.ApplyRobotSpeeds()
                 .withSpeeds(speeds)
         );
+    private void updateLimelightPoseForCameraMT2(String cameraName) {
+        LimelightHelpers.SetRobotOrientation(
+            cameraName,
+            this.getState().Pose.getRotation().getDegrees(),
+            0, 0, 0, 0, 0
+        );
+
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(cameraName);
+
+        if (mt2 == null) return;
+        if (mt2.tagCount == 0) return;
+        if (mt2.avgTagDist > 3.5) return;
+
+        // Reject if robot is rotating too fast — MT2 pose goes bad during spin
+        double yawRateDegPerSec = Math.abs(this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble());
+        if (yawRateDegPerSec > 720) return;
+
+        // Dynamic stddevs: tighter when close + multiple tags, looser when far/single tag
+        double distanceFactor = mt2.avgTagDist * mt2.avgTagDist; // square for aggressive falloff
+        double tagCountFactor = mt2.tagCount > 1 ? 0.5 : 1.0;   // multi-tag bonus
+        double xyStddev = 0.3 * distanceFactor * tagCountFactor;
+        xyStddev = Math.max(0.05, Math.min(xyStddev, 2.0));      // clamp to sane range
+
+        double timestamp = Utils.fpgaToCurrentTime(Timer.getFPGATimestamp() - mt2.latency / 1000.0);
+
+        super.addVisionMeasurement(mt2.pose, timestamp, VecBuilder.fill(xyStddev, xyStddev, 9999999));
     }
 }
