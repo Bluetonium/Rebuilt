@@ -50,7 +50,7 @@ public class RobotContainer {
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
     new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1)
-        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        .withDriveRequestType(DriveRequestType.Velocity);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -65,7 +65,7 @@ public class RobotContainer {
     @Getter
     private static Command currentAuto;
 
-    private boolean isRed() {
+    public static boolean isRed() {
         return DriverStation.isFMSAttached()
             ? DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
             : NetworkTableInstance.getDefault()
@@ -91,12 +91,19 @@ public class RobotContainer {
         setupSubsystems();
 
         NamedCommands.registerCommand("align", align());
+        NamedCommands.registerCommand("moveDown", intake.moveDown());
+        NamedCommands.registerCommand("moveUp", intake.moveUp());
+        NamedCommands.registerCommand("runForward", intake.runForward());
+        NamedCommands.registerCommand("runBackward", intake.runBackward());
 
         autoChooser = AutoBuilder.buildAutoChooser();
         currentAuto = autoChooser.getSelected();
         autoChooser.onChange((command) -> currentAuto = command);
         SmartDashboard.putData("Autonomous", autoChooser);
     }
+
+    private double aimIntegral = 0;
+    private double lastTimestamp = Timer.getFPGATimestamp();
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -110,7 +117,7 @@ public class RobotContainer {
             )
         );
 
-        driveAtAngle.HeadingController.setPID(6, 0.02, 0.1);
+        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.25);
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Idle while the robot is disabled. This ensures the configured
@@ -146,37 +153,7 @@ public class RobotContainer {
         }));
 
         // Autoaim
-        RobotStates.autoAim.whileTrue(
-    drivetrain.applyRequest(() -> {
-
-        Rotation2d target = getAngleToHub();
-        Rotation2d current = drivetrain.getState().Pose.getRotation();
-
-        double error = MathUtil.angleModulus(
-            target.minus(current).getRadians()
-        );
-
-        double turn;
-
-        // if far away, rotate at constant speed
-        if (Math.abs(error) > Math.toRadians(6)) {
-            turn = Math.copySign(4, error);
-        }
-        // if close, use PID for precision
-        else {
-            turn = driveAtAngle.HeadingController.calculate(
-                current.getRadians(),
-                target.getRadians(),
-                Timer.getFPGATimestamp()
-            );
-        }
-
-        return drive
-            .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
-            .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
-            .withRotationalRate(turn);
-    })
-);
+        RobotStates.autoAim.whileTrue(autoAimCommand());
 
         RobotStates.toggleHubPosition.onTrue(toggleHubPosition());
 
@@ -208,7 +185,7 @@ public class RobotContainer {
         double dx = hubX - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
-        return new Rotation2d(dx, dy);
+        return new Translation2d(dx, dy).getAngle();
     }
 
 
@@ -240,25 +217,52 @@ public class RobotContainer {
         return Commands.runOnce(() -> hubX = (hubX == 11.9167) ? 4.625 : 11.9167);
     }
 
+    public Command autoAimCommand() {
+        return drivetrain.applyRequest(() -> {
+
+            Rotation2d target = getAngleToHub();
+            Rotation2d current = drivetrain.getState().Pose.getRotation();
+
+            double error = MathUtil.angleModulus(
+                target.minus(current).getRadians()
+            );
+
+            double now = Timer.getFPGATimestamp();
+            double dt = now - lastTimestamp;
+            lastTimestamp = now;
+
+            double kP = 8.0;
+            double kI = 1.2;
+
+            aimIntegral += error * dt;
+            aimIntegral = MathUtil.clamp(aimIntegral, -0.4, 0.4);
+
+            double turn = kP * error + kI * aimIntegral;
+
+            double minTurn = 0.22;
+            if (Math.abs(turn) < minTurn && Math.abs(error) > Math.toRadians(0.1)) {
+                turn = Math.copySign(minTurn, error);
+            }
+
+            double maxTurnRate = 4.0;
+            turn = MathUtil.clamp(turn, -maxTurnRate, maxTurnRate);
+
+            if (Math.abs(error) < Math.toRadians(0.05)) {
+                turn = 0;
+                aimIntegral = 0;
+            }
+
+            return drive
+                .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
+                .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
+                .withRotationalRate(turn);
+        });
+    }
+
     public Command align() {
-        final var idle = new SwerveRequest.Idle();
-
-        // make it work moving backwards from the   vvauton start line
-        // figure out whether velocity is relative to robot position or absolute world coordinates
-        // shooter starts at negative velocity?
-        
         return Commands.sequence(
-            drivetrain.applyRequest(() ->
-                driveAtAngle
-                    .withVelocityX(0)
-                    .withVelocityY(0)
-                    .withTargetDirection(getAngleToHub())
-            )
-            .withTimeout(5.0),
-
-            shooter.runFlywheelAndLoader().withTimeout(14.0),
-
-            drivetrain.applyRequest(() -> idle)
+            autoAimCommand().withTimeout(5.0),
+            shooter.runFlywheelAndLoader().withTimeout(14.0)
         );
     }
 }

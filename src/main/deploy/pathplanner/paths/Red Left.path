@@ -106,10 +106,37 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "",
-      "waypointRelativePos": 0,
+      "name": "runForward",
+      "waypointRelativePos": 1.06,
+      "endWaypointRelativePos": 2.19,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "runForward"
+        }
+      }
+    },
+    {
+      "name": "moveDown",
+      "waypointRelativePos": 1.0631229235880408,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "moveDown"
+        }
+      }
+    },
+    {
+      "name": "moveUp",
+      "waypointRelativePos": 2.192691029900332,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "moveUp"
+        }
+      }
     }
   ],
   "globalConstraints": {
