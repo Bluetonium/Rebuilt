@@ -13,8 +13,8 @@ import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 
 public class AutoAim {
     private CommandSwerveDrivetrain drivetrain;
-    private double hubX;
     private SwerveRequest.FieldCentric drive;
+    private RobotContainer robotContainer;
 
     private double aimIntegral = 0;
     private double lastTimestamp = Timer.getFPGATimestamp();
@@ -22,17 +22,17 @@ public class AutoAim {
     private boolean simLineVisible;
     private boolean simArrowVisible;
 
-    public AutoAim(CommandSwerveDrivetrain drivetrain, double hubX, SwerveRequest.FieldCentric drive) {
+    public AutoAim(CommandSwerveDrivetrain drivetrain, SwerveRequest.FieldCentric drive, RobotContainer robotContainer) {
         this.drivetrain = drivetrain;
-        this.hubX = hubX;
         this.drive = drive;
+        this.robotContainer = robotContainer;
     }
 
     public Rotation2d getAngleToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        double dx = hubX - robotPos.getX();
+        double dx = robotContainer.getHubX() - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
         return new Translation2d(dx, dy).getAngle();
@@ -43,7 +43,7 @@ public class AutoAim {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        double dx = hubX - robotPos.getX();
+        double dx = robotContainer.getHubX() - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
         return Math.sqrt(dx * dx + dy * dy);
