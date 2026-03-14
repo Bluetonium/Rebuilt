@@ -37,9 +37,6 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
-    new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1)
-        .withDriveRequestType(DriveRequestType.Velocity);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -110,9 +107,6 @@ public class RobotContainer {
             )
         );
 
-        driveAtAngle.HeadingController.setPID(4, 0.0, 0.25);
-        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
@@ -170,27 +164,6 @@ public class RobotContainer {
     //     return !isRed() && DriverStation.isTeleopEnabled() ? angle + 180 : angle;
     // }
 
-    public Rotation2d getAngleToHub() {
-        Pose2d robotPose = drivetrain.getState().Pose;
-        Translation2d robotPos = robotPose.getTranslation();
-
-        double dx = hubX - robotPos.getX();
-        double dy = 4.034 - robotPos.getY();
-
-        return new Translation2d(dx, dy).getAngle().plus(Rotation2d.fromDegrees(180));
-    }
-
-
-    public double getDistanceToHub() {
-        Pose2d robotPose = drivetrain.getState().Pose;
-        Translation2d robotPos = robotPose.getTranslation();
-
-        double dx = hubX - robotPos.getX();
-        double dy = 4.034 - robotPos.getY();
-
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
     public Command getAutonomousCommand() {
         return currentAuto;
     }
@@ -207,23 +180,5 @@ public class RobotContainer {
 
     public Command toggleHubPosition() {
         return Commands.runOnce(() -> hubX = (hubX == 11.9167) ? 4.625 : 11.9167);
-    }
-
-    public Command autoAimCommand() {
-        return drivetrain.applyRequest(() -> {
-            Rotation2d target = getAngleToHub();
-
-            return driveAtAngle
-                .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
-                .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
-                .withTargetDirection(target);
-        });
-    }
-
-    public Command align() {
-        return Commands.sequence(
-            autoAimCommand().withTimeout(5.0),
-            shooter.runFlywheelAndLoader().withTimeout(14.0)
-        );
     }
 }
