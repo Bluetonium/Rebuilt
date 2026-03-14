@@ -45,10 +45,11 @@ public class RobotContainer {
     //i will incorporate this later just dont want to forget or smth idrk
     public final static CommandXboxController pidController = new CommandXboxController(3);
 
+    @Getter
     private double hubX = initHubPosition();
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final AutoAim autoaim = new AutoAim(drivetrain, hubX, drive);
+    public final AutoAim autoaim = new AutoAim(drivetrain, drive, this);
 
     private final SendableChooser<Command> autoChooser;
     @Getter
@@ -65,10 +66,6 @@ public class RobotContainer {
 
     public double initHubPosition() {
         return isRed() ? 11.9167 : 4.625;
-    }
-
-    public double getHubX() {
-        return hubX;
     }
 
     @Getter

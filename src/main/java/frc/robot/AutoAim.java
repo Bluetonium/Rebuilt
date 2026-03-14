@@ -12,7 +12,7 @@ import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 
 public class AutoAim {
     private CommandSwerveDrivetrain drivetrain;
-    private double hubX;
+    private RobotContainer robotContainer;
 
     private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
     new SwerveRequest.FieldCentricFacingAngle().withDeadband(RobotContainer.MaxSpeed * 0.1)
@@ -21,9 +21,9 @@ public class AutoAim {
     private boolean simLineVisible;
     private boolean simArrowVisible;
 
-    public AutoAim(CommandSwerveDrivetrain drivetrain, double hubX, SwerveRequest.FieldCentric drive) {
+    public AutoAim(CommandSwerveDrivetrain drivetrain, SwerveRequest.FieldCentric drive, RobotContainer robotContainer) {
         this.drivetrain = drivetrain;
-        this.hubX = hubX;
+        this.robotContainer = robotContainer;
 
         driveAtAngle.HeadingController.setPID(4, 0.0, 0.25);
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -33,7 +33,7 @@ public class AutoAim {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        double dx = hubX - robotPos.getX();
+        double dx = robotContainer.getHubX() - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
         return new Translation2d(dx, dy).getAngle().plus(Rotation2d.fromDegrees(180));
@@ -44,7 +44,7 @@ public class AutoAim {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();
 
-        double dx = hubX - robotPos.getX();
+        double dx = robotContainer.getHubX() - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
         return Math.sqrt(dx * dx + dy * dy);

@@ -87,12 +87,19 @@ public class Robot extends LoggedRobot {
             )
         );
 
-        Pose2d targetPose = new Pose2d(frontTranslation, m_robotContainer.autoaim.getAngleToHub());
+        // target trajectory
+        Translation2d targetTranslation =
+            robotPose.getTranslation().plus(
+                new Translation2d(length, 0).rotateBy(m_robotContainer.autoaim.getAngleToHub())
+            );
+
+
+        Pose2d targetPose = new Pose2d(targetTranslation, m_robotContainer.autoaim.getAngleToHub());
 
         Trajectory targetTrajectory = new Trajectory(
             List.of(
                 new Trajectory.State(0, 0, 0, robotPose, 0),
-                new Trajectory.State(1, 0, 0, targetPose, 0)
+                new Trajectory.State(0, 0, 0, targetPose, 0)
             )
         );
 
