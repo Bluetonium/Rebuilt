@@ -10,37 +10,26 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
 
 import lombok.Getter;
 
 public class RobotContainer {
-    private double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    public static double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-
-    private double hubX;
                 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -48,9 +37,6 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
-    new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1)
-        .withDriveRequestType(DriveRequestType.Velocity);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -59,7 +45,11 @@ public class RobotContainer {
     //i will incorporate this later just dont want to forget or smth idrk
     public final static CommandXboxController pidController = new CommandXboxController(3);
 
+    @Getter
+    private double hubX = initHubPosition();
+
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final AutoAim autoaim = new AutoAim(drivetrain, drive, this);
 
     private final SendableChooser<Command> autoChooser;
     @Getter
@@ -74,8 +64,8 @@ public class RobotContainer {
                 .getBoolean(false);
     }
 
-    public void initHubPosition() {
-        hubX = isRed() ? 11.9167 : 4.625;
+    public double initHubPosition() {
+        return isRed() ? 11.9167 : 4.625;
     }
 
     @Getter
@@ -90,7 +80,7 @@ public class RobotContainer {
         configureBindings();
         setupSubsystems();
 
-        NamedCommands.registerCommand("align", align());
+        NamedCommands.registerCommand("align", autoaim.align());
         NamedCommands.registerCommand("moveDown", intake.moveDown());
         NamedCommands.registerCommand("moveUp", intake.moveUp());
         NamedCommands.registerCommand("runForward", intake.runForward());
@@ -101,9 +91,6 @@ public class RobotContainer {
         autoChooser.onChange((command) -> currentAuto = command);
         SmartDashboard.putData("Autonomous", autoChooser);
     }
-
-    private double aimIntegral = 0;
-    private double lastTimestamp = Timer.getFPGATimestamp();
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -116,9 +103,6 @@ public class RobotContainer {
                     .withRotationalRate(-chassisController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
-
-        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.25);
-        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -152,7 +136,7 @@ public class RobotContainer {
         );
 
         // Autoaim
-        RobotStates.autoAim.whileTrue(autoAimCommand());
+        RobotStates.autoAim.whileTrue(autoaim.autoAimCommand());
 
         RobotStates.toggleHubPosition.onTrue(toggleHubPosition());
 
@@ -177,33 +161,12 @@ public class RobotContainer {
     //     return !isRed() && DriverStation.isTeleopEnabled() ? angle + 180 : angle;
     // }
 
-    public Rotation2d getAngleToHub() {
-        Pose2d robotPose = drivetrain.getState().Pose;
-        Translation2d robotPos = robotPose.getTranslation();
-
-        double dx = hubX - robotPos.getX();
-        double dy = 4.034 - robotPos.getY();
-
-        return new Translation2d(dx, dy).getAngle();
-    }
-
-
-    public double getDistanceToHub() {
-        Pose2d robotPose = drivetrain.getState().Pose;
-        Translation2d robotPos = robotPose.getTranslation();
-
-        double dx = hubX - robotPos.getX();
-        double dy = 4.034 - robotPos.getY();
-
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
     public Command getAutonomousCommand() {
         return currentAuto;
     }
 
     private void initializeSubsystems() {
-        shooter = new Shooter(this::getDistanceToHub);
+        shooter = new Shooter(autoaim::getDistanceToHub);
         intake = new Intake();
     }
 
@@ -214,54 +177,5 @@ public class RobotContainer {
 
     public Command toggleHubPosition() {
         return Commands.runOnce(() -> hubX = (hubX == 11.9167) ? 4.625 : 11.9167);
-    }
-
-    public Command autoAimCommand() {
-        return drivetrain.applyRequest(() -> {
-
-            Rotation2d target = getAngleToHub();
-            Rotation2d current = drivetrain.getState().Pose.getRotation();
-
-            double error = MathUtil.angleModulus(
-                target.minus(current).getRadians()
-            );
-
-            double now = Timer.getFPGATimestamp();
-            double dt = now - lastTimestamp;
-            lastTimestamp = now;
-
-            double kP = 8.0;
-            double kI = 1.2;
-
-            aimIntegral += error * dt;
-            aimIntegral = MathUtil.clamp(aimIntegral, -0.4, 0.4);
-
-            double turn = kP * error + kI * aimIntegral;
-
-            double minTurn = 0.22;
-            if (Math.abs(turn) < minTurn && Math.abs(error) > Math.toRadians(0.1)) {
-                turn = Math.copySign(minTurn, error);
-            }
-
-            double maxTurnRate = 4.0;
-            turn = MathUtil.clamp(turn, -maxTurnRate, maxTurnRate);
-
-            if (Math.abs(error) < Math.toRadians(0.05)) {
-                turn = 0;
-                aimIntegral = 0;
-            }
-
-            return drive
-                .withVelocityX(-chassisController.getLeftY() * MaxSpeed)
-                .withVelocityY(-chassisController.getLeftX() * MaxSpeed)
-                .withRotationalRate(turn);
-        });
-    }
-
-    public Command align() {
-        return Commands.sequence(
-            autoAimCommand().withTimeout(5.0),
-            shooter.runFlywheelAndLoader().withTimeout(14.0)
-        );
     }
 }

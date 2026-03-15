@@ -74,7 +74,7 @@ public class ShooterConstants {
 
         //can id
         public static final int LOADER_MOTOR_CAN_ID = 19;
-        public static final NeutralModeValue LOADER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+        public static final NeutralModeValue LOADER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Brake;
 
         //current limits
         //what do these need to be??? its a x44 motor so yeah there you go. please help i dont trust Claude hes drinking all my water
@@ -108,7 +108,7 @@ public class ShooterConstants {
 
         //can id
         public static final int TRANSFER_MOTOR_CAN_ID = 21;
-        public static final NeutralModeValue TRANSFER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+        public static final NeutralModeValue TRANSFER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Brake;
 
         //current limits
         //what do these need to be??? its a x44 motor so yeah there you go. please help i dont trust Claude hes drinking all my water

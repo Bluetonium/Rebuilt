@@ -101,10 +101,10 @@ public class RobotStates {
         sysStaRev = new Trigger(RobotContainer.shootController.b());
 
         // chassis
-        brake = new Trigger(RobotContainer.chassisController.leftBumper());
-        resetHeading = new Trigger(RobotContainer.chassisController.a());
-        slowMode = new Trigger(RobotContainer.chassisController.leftTrigger());
-        autoAim = new Trigger(RobotContainer.chassisController.rightTrigger());
-        toggleHubPosition = new Trigger(RobotContainer.chassisController.povRight());
+        brake = RobotContainer.chassisController.leftBumper();
+        resetHeading = RobotContainer.chassisController.a();
+        slowMode = RobotContainer.chassisController.leftTrigger();
+        autoAim = RobotContainer.chassisController.rightTrigger();
+        toggleHubPosition = RobotContainer.chassisController.povRight();
     }
 }
