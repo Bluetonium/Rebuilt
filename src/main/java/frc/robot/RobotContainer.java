@@ -85,6 +85,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("moveUp", intake.moveUp());
         NamedCommands.registerCommand("runForward", intake.runForward());
         NamedCommands.registerCommand("runBackward", intake.runBackward());
+        NamedCommands.registerCommand("startFlywheel", shooter.runFlywheel());
 
         autoChooser = AutoBuilder.buildAutoChooser();
         currentAuto = autoChooser.getSelected();

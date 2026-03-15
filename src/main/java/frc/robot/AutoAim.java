@@ -63,9 +63,13 @@ public class AutoAim {
     }
 
     public boolean isAimed() {
-        Rotation2d target = getAngleToHub();
+        Rotation2d target = getAngleToHub().plus(Rotation2d.fromDegrees(180));
         Rotation2d current = drivetrain.getState().Pose.getRotation();
-        double error = target.minus(current).getRadians();
+
+        double error = MathUtil.angleModulus(
+            target.getRadians() - current.getRadians()
+        );
+
         return Math.abs(error) < Math.toRadians(10.0);
     }
 
@@ -73,8 +77,8 @@ public class AutoAim {
         return Commands.parallel(
             autoAimCommand(),
             Commands.sequence(
-                Commands.waitUntil(this::isAimed).withTimeout(5.0),
-                RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(20.0)
+                Commands.waitUntil(this::isAimed).withTimeout(3.0),
+                RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(7.0)
             )
         );
     }
