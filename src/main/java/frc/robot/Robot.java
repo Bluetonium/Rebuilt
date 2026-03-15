@@ -90,11 +90,11 @@ public class Robot extends LoggedRobot {
         // target trajectory
         Translation2d targetTranslation =
             robotPose.getTranslation().plus(
-                new Translation2d(length, 0).rotateBy(m_robotContainer.autoaim.getAngleToHub())
+                new Translation2d(length, 0).rotateBy(m_robotContainer.autoaim.getAngleToHub().plus(Rotation2d.fromDegrees(180)))
             );
 
 
-        Pose2d targetPose = new Pose2d(targetTranslation, m_robotContainer.autoaim.getAngleToHub());
+        Pose2d targetPose = new Pose2d(targetTranslation, m_robotContainer.autoaim.getAngleToHub().plus(Rotation2d.fromDegrees(180)));
 
         Trajectory targetTrajectory = new Trajectory(
             List.of(
