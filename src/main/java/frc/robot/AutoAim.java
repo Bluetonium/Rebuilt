@@ -26,7 +26,8 @@ public class AutoAim {
         this.drivetrain = drivetrain;
         this.robotContainer = robotContainer;
 
-        driveAtAngle.HeadingController.setPID(4, 0.0, 0.25);
+        driveAtAngle.HeadingController.setPID(5, 1.4, 0.07);
+        driveAtAngle.HeadingController.setIZone(Math.toRadians(5.0));
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 

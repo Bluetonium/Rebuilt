@@ -208,7 +208,7 @@ public class Intake extends SubsystemBase{
         },
         () -> {
             intakeMotor.setControl(intakeVelocityVoltage.withVelocity(0));
-        }).withName("IntakeForward");
+        }, this).withName("IntakeForward");
     }
 
     public Command runForwardAuton() {
