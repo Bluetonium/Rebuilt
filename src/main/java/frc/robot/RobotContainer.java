@@ -37,9 +37,6 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    private final SwerveRequest.FieldCentricFacingAngle driveAtAngle =
-    new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.1)
-        .withDriveRequestType(DriveRequestType.Velocity);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -106,9 +103,6 @@ public class RobotContainer {
                     .withRotationalRate(-chassisController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
-
-        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.25);
-        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
