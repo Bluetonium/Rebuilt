@@ -64,7 +64,7 @@ public class AutoAim {
     public Command align() {
         return Commands.sequence(
             autoAimCommand().withTimeout(5.0),
-            RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(14.0)
+            RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(8.0)
         );
     }
 
