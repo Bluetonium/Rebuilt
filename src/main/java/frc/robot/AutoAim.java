@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -61,10 +62,20 @@ public class AutoAim {
         });
     }
 
+    public boolean isAimed() {
+        Rotation2d target = getAngleToHub();
+        Rotation2d current = drivetrain.getState().Pose.getRotation();
+        double error = target.minus(current).getRadians();
+        return Math.abs(error) < Math.toRadians(10.0);
+    }
+
     public Command align() {
-        return Commands.sequence(
-            autoAimCommand().withTimeout(5.0),
-            RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(8.0)
+        return Commands.parallel(
+            autoAimCommand(),
+            Commands.sequence(
+                Commands.waitUntil(this::isAimed).withTimeout(5.0),
+                RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(20.0)
+            )
         );
     }
 
