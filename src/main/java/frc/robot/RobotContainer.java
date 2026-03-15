@@ -46,7 +46,7 @@ public class RobotContainer {
     public final static CommandXboxController pidController = new CommandXboxController(3);
 
     @Getter
-    private double hubX = initHubPosition();
+    private double hubX = 1;
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final AutoAim autoaim = new AutoAim(drivetrain, drive, this);
@@ -64,8 +64,8 @@ public class RobotContainer {
                 .getBoolean(false);
     }
 
-    public double initHubPosition() {
-        return isRed() ? 11.9167 : 4.625;
+    public void initHubPosition() {
+        hubX = isRed() ? 11.9167 : 4.625;
     }
 
     @Getter
@@ -78,14 +78,16 @@ public class RobotContainer {
         initializeSubsystems();
         RobotStates.setupStates();
         configureBindings();
-        setupSubsystems();
 
         NamedCommands.registerCommand("align", autoaim.align());
         NamedCommands.registerCommand("moveDown", intake.moveDown());
         NamedCommands.registerCommand("moveUp", intake.moveUp());
-        NamedCommands.registerCommand("runForward", intake.runForward());
+        NamedCommands.registerCommand("intakeFunnel", intake.intakeFunnel());
+        NamedCommands.registerCommand("runForward", intake.runForwardAuton());
         NamedCommands.registerCommand("runBackward", intake.runBackward());
         NamedCommands.registerCommand("startFlywheel", shooter.runFlywheel());
+
+        setupSubsystems();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         currentAuto = autoChooser.getSelected();

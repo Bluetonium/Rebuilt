@@ -40,7 +40,6 @@ public class AutoAim {
         return new Translation2d(dx, dy).getAngle().plus(Rotation2d.fromDegrees(180));
     }
 
-
     public double getDistanceToHub() {
         Pose2d robotPose = drivetrain.getState().Pose;
         Translation2d robotPos = robotPose.getTranslation();

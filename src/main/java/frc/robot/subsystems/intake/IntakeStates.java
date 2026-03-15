@@ -15,6 +15,7 @@ public class IntakeStates {
 
         RobotStates.intakeDown.onTrue(intake.moveDown());
         RobotStates.intakeUp.onTrue(intake.moveUp());
+        RobotStates.intakeFunnel.onTrue(intake.intakeFunnel());
 
 
          

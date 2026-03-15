@@ -12,6 +12,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
@@ -49,6 +50,7 @@ public class Intake extends SubsystemBase{
 
     private MotionMagicVelocityVoltage intakeDropperVelocityVoltage = new MotionMagicVelocityVoltage(0).withAcceleration(IntakeConstants.INTAKE_DROPPER_ACCELERATION);
 
+    private boolean m_runRoller = false;
     
     @Override
     public void initSendable(SendableBuilder builder) {
@@ -163,7 +165,9 @@ public class Intake extends SubsystemBase{
     public void setup() {
 
         setDefaultCommand(run(() -> {
-            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(0));
+            intakeMotor.setControl(intakeVelocityVoltage.withVelocity(
+                m_runRoller ? IntakeConstants.INTAKE_FORWARD_VELOCITY : 0
+            ));
             intakeDropperMotor.setControl(m_motionMagicRequest.withPosition(m_targetAngle / 360.0));
         }).withName("Intake.Stopped"));//TODO once again rename to be consistant
 
@@ -204,10 +208,15 @@ public class Intake extends SubsystemBase{
         },
         () -> {
             intakeMotor.setControl(intakeVelocityVoltage.withVelocity(0));
-        }, this).withName("IntakeForward");
+        }).withName("IntakeForward");
     }
 
-
+    public Command runForwardAuton() {
+        return Commands.startEnd(
+            () -> m_runRoller = true,
+            () -> m_runRoller = false
+        ).withName("IntakeForwardAuton");
+    }
 
     public Command runBackward() {
         return new StartEndCommand(
@@ -219,18 +228,32 @@ public class Intake extends SubsystemBase{
         }, this).withName("IntakeReverse");
     }
 
-    public Command toggleAngle(double angleA, double angleB) {
+    // we gotta add the braking to this !!!!!!!!!
+    /*public Command toggleAngle(double angleA, double angleB) {
         return Commands.runOnce(() -> {
             m_toggleState = !m_toggleState;
             m_targetAngle = m_toggleState ? angleB : angleA;
         }).withName("IntakeToggleAngle");
-    }
+    }*/
 
     public Command moveDown() {
-        return Commands.runOnce(() -> m_targetAngle = IntakeConstants.INTAKE_DOWN_ANGLE).withName("IntakeMoveDown");
+        return Commands.runOnce(() -> {
+            m_targetAngle = IntakeConstants.INTAKE_DOWN_ANGLE;
+            intakeDropperMotor.setNeutralMode(NeutralModeValue.Coast);
+        }).withName("IntakeMoveDown");
     }
 
     public Command moveUp() {
-        return Commands.runOnce(() -> m_targetAngle = IntakeConstants.INTAKE_UP_ANGLE).withName("IntakeMoveUp");
+        return Commands.runOnce(() -> {
+            m_targetAngle = IntakeConstants.INTAKE_UP_ANGLE;
+            intakeDropperMotor.setNeutralMode(NeutralModeValue.Brake);
+        }).withName("IntakeMoveUp");
+    }
+
+    public Command intakeFunnel() {
+        return Commands.runOnce(() -> {
+            m_targetAngle = IntakeConstants.INTAKE_FUNNEL_ANGLE;
+            intakeDropperMotor.setNeutralMode(NeutralModeValue.Brake);
+        }).withName("IntakeFunnel");
     }
 }

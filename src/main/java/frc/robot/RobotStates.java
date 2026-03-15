@@ -52,6 +52,7 @@ public class RobotStates {
     public static Trigger reverseIntake;
     public static Trigger intakeDown;
     public static Trigger intakeUp;
+    public static Trigger intakeFunnel;
 
     public static Trigger sysDyn;
     public static Trigger sysSta;
@@ -93,6 +94,7 @@ public class RobotStates {
         reverseIntake = RobotContainer.shootController.leftBumper();
         intakeDown = RobotContainer.shootController.povDown();
         intakeUp = RobotContainer.shootController.povUp();
+        intakeFunnel = RobotContainer.shootController.povRight();
 
         // PID Stuff
         sysDyn = new Trigger(RobotContainer.shootController.x());

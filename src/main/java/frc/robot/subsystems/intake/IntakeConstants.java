@@ -14,6 +14,7 @@ public class IntakeConstants {
     //-----------------------------
 
     public static final double INTAKE_DOWN_ANGLE = 0.0;
+    public static final double INTAKE_FUNNEL_ANGLE = 40.0;
     public static final double INTAKE_UP_ANGLE = 90.0;
 
     public static final double INTAKE_DROPPER_ACCELERATION = 1.5;
@@ -22,7 +23,7 @@ public class IntakeConstants {
     public static final double INTAKE_DROPPER_INITIAL_ANGLE = 90.0;
 
     public static final int INTAKE_DROPPER_MOTOR_CAN_ID = 20;
-    public static final NeutralModeValue INTAKE_DROPPER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Coast;
+    public static final NeutralModeValue INTAKE_DROPPER_MOTOR_NEUTRAL_MODE = NeutralModeValue.Brake;
 
     public static final CurrentLimitsConfigs INTAKE_DROPPER_CURRENT_LIMITS = new CurrentLimitsConfigs()
             .withStatorCurrentLimit(50)
