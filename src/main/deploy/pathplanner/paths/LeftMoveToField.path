@@ -1,0 +1,123 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.749,
+        "y": 3.472
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 9.749,
+        "y": 3.472
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 9.990841654778887,
+        "y": 2.1136091298145514
+      },
+      "prevControl": {
+        "x": 10.236676176890157,
+        "y": 3.498045649072753
+      },
+      "nextControl": {
+        "x": 9.669419857448018,
+        "y": 0.3034969027407126
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 10.831854493580597,
+        "y": 0.5868473609129818
+      },
+      "prevControl": {
+        "x": 10.535661554921536,
+        "y": 0.6094900142653369
+      },
+      "nextControl": {
+        "x": 11.4757088053094,
+        "y": 0.5376275177394907
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 13.25138373751783,
+        "y": 0.5868473609129818
+      },
+      "prevControl": {
+        "x": 13.011344988977076,
+        "y": 0.5169803501068194
+      },
+      "nextControl": {
+        "x": 13.491422486058585,
+        "y": 0.6567143717191444
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 14.208844507845933,
+        "y": 1.3243509272467906
+      },
+      "prevControl": {
+        "x": 13.885378031383736,
+        "y": 1.3114122681883031
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 3.3,
+      "rotationDegrees": -178.81861609830008
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "startFlywheel",
+      "waypointRelativePos": 1.3432324386065113,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "startFlywheel"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 2.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 129.8848548694005
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 2.0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": false
+}

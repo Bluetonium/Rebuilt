@@ -74,6 +74,8 @@ public class Shooter extends SubsystemBase {
 
         builder.addDoubleProperty("Transfer Target Velocity", () -> transferVelocityVoltage.Velocity,null);
         builder.addDoubleProperty("Transfer Velocity", () -> transferMotor.getVelocity().getValueAsDouble(), null);
+
+        builder.addDoubleProperty("Distance to Hub", distanceSupplier::getAsDouble, null);
     }
 
 
@@ -231,6 +233,8 @@ public class Shooter extends SubsystemBase {
         }).withName("Outtake.Stopped"));
 
         ShooterStates.setupStates();
+
+        SmartDashboard.putNumber("StaticShooterVelocity", staticShooterVelocity);
     }
 
     @Override
@@ -346,18 +350,31 @@ public class Shooter extends SubsystemBase {
     }
 
     private static final InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
-    private static double staticShooterVelocity = 79;
+    private static double staticShooterVelocity = 61;
     private static boolean useStaticVelocity = false;
 
     static {
-        shooterMap.put(2.328, 60.0);
-        shooterMap.put(3.037, 65.0);
-        shooterMap.put(3.575, 70.0);
-        shooterMap.put(4.103, 80.0);
+        //shooterMap.put(2.328, 60.0);
+        //shooterMap.put(3.037, 65.0);
+        //shooterMap.put(3.575, 70.0);
+        //shooterMap.put(4.103, 80.0);
+        shooterMap.put(1.79, 58.0);
+        shooterMap.put(1.97, 58.0);
+        shooterMap.put(2.16, 55.0);
+        shooterMap.put(2.32, 56.0);
+        shooterMap.put(2.82, 60.0);
+        shooterMap.put(3.00, 70.0);
+        shooterMap.put(3.33, 73.0);
+        shooterMap.put(3.44, 76.0);
+        shooterMap.put(3.55, 79.0);
+        shooterMap.put(3.60, 85.0);
+        shooterMap.put(3.86, 88.0);
     }
 
     @Override
     public void periodic() {
+        staticShooterVelocity = SmartDashboard.getNumber("StaticShooterVelocity", staticShooterVelocity);
+
         if(useStaticVelocity) {
             ShooterConstants.FLYWHEEL_TARGET_VELOCITY = staticShooterVelocity;
         } else {
