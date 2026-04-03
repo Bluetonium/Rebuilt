@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.445463623395149,
-        "y": 4.028530670470756
+        "x": 13.337580071174377,
+        "y": 4.029620403321471
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 14.920470756062766,
-        "y": 4.029620403321471
+        "x": 14.273537803138373,
+        "y": 2.0877318116975756
       },
       "prevControl": {
-        "x": 14.118273894436518,
-        "y": 4.028530670470756
+        "x": 13.735578135285467,
+        "y": 2.0984910050546333
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "startFlywheel",
-      "waypointRelativePos": 0.027412906910336897,
+      "waypointRelativePos": 0.0,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -42,21 +42,10 @@
           "name": "startFlywheel"
         }
       }
-    },
-    {
-      "name": "moveDown",
-      "waypointRelativePos": 0.36255319148936266,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "moveDown"
-        }
-      }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 0.2,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

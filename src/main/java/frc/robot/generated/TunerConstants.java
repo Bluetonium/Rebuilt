@@ -51,18 +51,40 @@ public class TunerConstants {
 
     // The stator current at which the wheels start to slip;
     // This needs to be tuned to your individual robot
-    private static final Current kSlipCurrent = Amps.of(120);
+    private static final Current kSlipCurrent = Amps.of(30);
+
+    //---------------maybe use this later for drive and steer limits (right below here)
+    //private static final Current overallCurrentLimit = Amps.of(30);
 
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
-    // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
-    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration();
+    // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.\
+
+
+    //kaiden check this keyword currentlimitnow
+    //this is where you actually set current limits
+    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration()
+        .withCurrentLimits(
+            new CurrentLimitsConfigs()
+                // Swerve azimuth does not require much torque output, so we can set a relatively low
+                // stator current limit to help avoid brownouts without impacting performance.
+                .withStatorCurrentLimit(Amps.of(30))
+                .withStatorCurrentLimitEnable(  true)
+                .withSupplyCurrentLimit(Amps.of(30))
+                .withSupplyCurrentLimitEnable(true)
+                //.withSupplyCurrentLowerLimit(Amps.of(25))
+        );
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(60))
+
+                //brownouts are more related to supply limits i believe rather than stator limit
+                //however stator limit does effectively change the supply current limit as well i think
+                .withStatorCurrentLimit(Amps.of(30))
                 .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(Amps.of(30))
+                .withSupplyCurrentLimitEnable(true)
         );
     private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
     // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
@@ -129,7 +151,7 @@ public class TunerConstants {
     private static final int kFrontLeftDriveMotorId = 9;
     private static final int kFrontLeftSteerMotorId = 10;
     private static final int kFrontLeftEncoderId = 11;
-    private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.151123046875);
+    private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.150146484375);
     private static final boolean kFrontLeftSteerMotorInverted = false;
     private static final boolean kFrontLeftEncoderInverted = false;
 
@@ -140,7 +162,7 @@ public class TunerConstants {
     private static final int kFrontRightDriveMotorId = 12;
     private static final int kFrontRightSteerMotorId = 13;
     private static final int kFrontRightEncoderId = 14;
-    private static final Angle kFrontRightEncoderOffset = Rotations.of(-0.4990234375);
+    private static final Angle kFrontRightEncoderOffset = Rotations.of(-0.498779296875);
     private static final boolean kFrontRightSteerMotorInverted = false;
     private static final boolean kFrontRightEncoderInverted = false;
 
@@ -148,10 +170,10 @@ public class TunerConstants {
     private static final Distance kFrontRightYPos = Inches.of(-10.375);
 
     // Back Left
-    private static final int kBackLeftDriveMotorId = 6;    
+    private static final int kBackLeftDriveMotorId = 6;
     private static final int kBackLeftSteerMotorId = 7;
     private static final int kBackLeftEncoderId = 8;
-    private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.472412109375);
+    private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.471923828125);
     private static final boolean kBackLeftSteerMotorInverted = false;
     private static final boolean kBackLeftEncoderInverted = false;
 
@@ -162,7 +184,7 @@ public class TunerConstants {
     private static final int kBackRightDriveMotorId = 3;
     private static final int kBackRightSteerMotorId = 4;
     private static final int kBackRightEncoderId = 5;
-    private static final Angle kBackRightEncoderOffset = Rotations.of(0.23974609375);
+    private static final Angle kBackRightEncoderOffset = Rotations.of(0.239501953125);
     private static final boolean kBackRightSteerMotorInverted = false;
     private static final boolean kBackRightEncoderInverted = false;
 

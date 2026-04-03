@@ -234,7 +234,7 @@ public class Shooter extends SubsystemBase {
 
         ShooterStates.setupStates();
 
-        SmartDashboard.putNumber("StaticShooterVelocity", staticShooterVelocity);
+        SmartDashboard.putNumber("StaticShooterVelocityCenter", staticShooterVelocityCenter);
     }
 
     @Override
@@ -332,10 +332,10 @@ public class Shooter extends SubsystemBase {
         }).withName("ShooterAndLoaderForward");
     }
 
-    public Command constantVelocityRunFlywheelAndLoader() {
+    public Command constantVelocityRunFlywheelAndLoaderCenter() {
         return run(() -> {
-            flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(staticShooterVelocity));
-            if (atConstantTargetSpeed()) {
+            flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(staticShooterVelocityCenter));
+            if (atConstantTargetSpeedCenter()) {
                 loaderMotor.setControl(loaderVelocityVoltage.withVelocity(ShooterConstants.LOADER_FORWARD_VELOCITY));
                 transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
             } else {
@@ -346,12 +346,31 @@ public class Shooter extends SubsystemBase {
             flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
             loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
             transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
-        }).withName("ConstantVelocityShooterAndLoaderForward");
+        }).withName("ConstantVelocityShooterAndLoaderForwardCenter");
+    }
+
+    public Command constantVelocityRunFlywheelAndLoaderSide() {
+        return run(() -> {
+            flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(staticShooterVelocitySide));
+            if (atConstantTargetSpeedSide()) {
+                loaderMotor.setControl(loaderVelocityVoltage.withVelocity(ShooterConstants.LOADER_FORWARD_VELOCITY));
+                transferMotor.setControl(transferVelocityVoltage.withVelocity(ShooterConstants.TRANSFER_FORWARD_VELOCITY));
+            } else {
+                loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
+                transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+            }
+        }).finallyDo(() -> {
+            flywheelLeadMotor.setControl(flywheelVelocityVoltage.withVelocity(0));
+            loaderMotor.setControl(loaderVelocityVoltage.withVelocity(0));
+            transferMotor.setControl(transferVelocityVoltage.withVelocity(0));
+        }).withName("ConstantVelocityShooterAndLoaderForwardSide");
     }
 
     private static final InterpolatingDoubleTreeMap shooterMap = new InterpolatingDoubleTreeMap();
-    private static double staticShooterVelocity = 61;
-    private static boolean useStaticVelocity = false;
+    private static double staticShooterVelocityCenter = 61; // 61
+    private static double staticShooterVelocitySide = 70;
+
+    private static boolean useStaticVelocity = false; // 75.93 inches 1.9286m (center hub to end of climber) | 57.93 inches 1.471m from center of hub
 
     static {
         //shooterMap.put(2.328, 60.0);
@@ -373,10 +392,10 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        staticShooterVelocity = SmartDashboard.getNumber("StaticShooterVelocity", staticShooterVelocity);
+        staticShooterVelocityCenter = SmartDashboard.getNumber("StaticShooterVelocityCenter", staticShooterVelocityCenter);
 
         if(useStaticVelocity) {
-            ShooterConstants.FLYWHEEL_TARGET_VELOCITY = staticShooterVelocity;
+            ShooterConstants.FLYWHEEL_TARGET_VELOCITY = staticShooterVelocityCenter;
         } else {
             double distance = distanceSupplier.getAsDouble();
             ShooterConstants.FLYWHEEL_TARGET_VELOCITY = shooterMap.get(distance);
@@ -389,7 +408,11 @@ public class Shooter extends SubsystemBase {
         return Math.abs(flywheelLeadMotor.getVelocity().getValueAsDouble() - ShooterConstants.FLYWHEEL_TARGET_VELOCITY) <= ShooterConstants.FLYWHEEL_VELOCITY_THRESHOLD;
     }
 
-    public boolean atConstantTargetSpeed() {
-        return Math.abs(flywheelLeadMotor.getVelocity().getValueAsDouble() - staticShooterVelocity) <= ShooterConstants.FLYWHEEL_VELOCITY_THRESHOLD;
+    public boolean atConstantTargetSpeedCenter() {
+        return Math.abs(flywheelLeadMotor.getVelocity().getValueAsDouble() - staticShooterVelocityCenter) <= ShooterConstants.FLYWHEEL_VELOCITY_THRESHOLD;
+    }
+
+    public boolean atConstantTargetSpeedSide() {
+        return Math.abs(flywheelLeadMotor.getVelocity().getValueAsDouble() - staticShooterVelocitySide) <= ShooterConstants.FLYWHEEL_VELOCITY_THRESHOLD;
     }
 }

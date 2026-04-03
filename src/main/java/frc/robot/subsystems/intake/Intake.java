@@ -129,6 +129,7 @@ public class Intake extends SubsystemBase{
         intakeDropperSlot0.kS = IntakeConstants.kS_dropper;
         intakeDropperSlot0.kV = IntakeConstants.kV_dropper;
         intakeDropperSlot0.kA = IntakeConstants.kA_dropper;
+        intakeDropperSlot0.kG = IntakeConstants.kG_dropper;
 
         intakeDropperMotorConfig.MotionMagic.MotionMagicCruiseVelocity = IntakeConstants.INTAKE_DROPPER_CRUISE_VELOCITY;
         intakeDropperMotorConfig.MotionMagic.MotionMagicAcceleration = IntakeConstants.INTAKE_DROPPER_ACCELERATION;

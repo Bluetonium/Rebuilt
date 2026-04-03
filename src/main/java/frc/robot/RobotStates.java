@@ -43,7 +43,8 @@ public class RobotStates {
     public static Trigger unjamShooter; // unjam 
     public static Trigger fireShooter; // prime, then start lauching balls
     public static Trigger primeShooter; // only prime
-    public static Trigger fireShooterConstantVelocity; // only prime
+    public static Trigger fireShooterConstantVelocityCenter;
+    public static Trigger fireShooterConstantVelocitySide;
 
     public static Trigger loadShooter;
     public static Trigger unloadShooter;
@@ -88,7 +89,8 @@ public class RobotStates {
         unjamShooter = new Trigger(RobotContainer.shootController.a());
         primeShooter = new Trigger(isLeftTriggerDown2());
         fireShooter = new Trigger(isRightTriggerDown2());
-        fireShooterConstantVelocity = new Trigger(RobotContainer.shootController.x());
+        fireShooterConstantVelocityCenter = new Trigger(RobotContainer.shootController.x());
+        fireShooterConstantVelocitySide = new Trigger(RobotContainer.shootController.b());
         
         runIntake = RobotContainer.shootController.rightBumper();
         reverseIntake = RobotContainer.shootController.leftBumper();
@@ -97,10 +99,10 @@ public class RobotStates {
         intakeFunnel = RobotContainer.shootController.povRight();
 
         // PID Stuff
-        sysDyn = new Trigger(RobotContainer.shootController.x());
-        sysSta = new Trigger(RobotContainer.shootController.y());
-        sysDynRev = new Trigger(RobotContainer.shootController.povRight());
-        sysStaRev = new Trigger(RobotContainer.shootController.b());
+        sysDyn = new Trigger(RobotContainer.chassisController.povLeft());
+        sysSta = new Trigger(RobotContainer.chassisController.povDown());
+        sysDynRev = new Trigger(RobotContainer.chassisController.povRight());
+        sysStaRev = new Trigger(RobotContainer.chassisController.povUp());
 
         // chassis
         brake = RobotContainer.chassisController.leftBumper();

@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -62,6 +63,14 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
+        // Wait for drivetrain to initialize
+        Timer.delay(0.5);
+        
+        // Seed heading from gyro physical orientation
+        m_robotContainer.drivetrain.seedFieldCentric();
+        
+        // Then seed position from limelight using that now-correct heading
+        m_robotContainer.drivetrain.resetPoseFromLimelight();
     }
 
     @Override
@@ -127,6 +136,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+        m_robotContainer.drivetrain.suppressVisionForAuto(); // add this first
         m_robotContainer.drivetrain.seedFieldCentric();
         m_robotContainer.initHubPosition();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -144,12 +154,19 @@ public class Robot extends LoggedRobot {
     public void autonomousExit() {
     }
 
+    private void teleopSetHeading() {
+        m_robotContainer.drivetrain.setOperatorPerspectiveForward(
+            RobotContainer.isRed() ? Rotation2d.fromDegrees(180) : Rotation2d.fromDegrees(0)
+        );
+    }
+
     @Override
     public void teleopInit() {
         SignalLogger.start();
+        m_robotContainer.drivetrain.seedFieldCentric();
+        teleopSetHeading();
         m_robotContainer.initHubPosition();
         if (m_autonomousCommand != null) {
-
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
     }

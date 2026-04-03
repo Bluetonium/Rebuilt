@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
@@ -165,7 +166,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             ),
             config, // The robot configuration
             () -> {
-              return RobotContainer.isRed() ? false : true;
+              return RobotContainer.isRed() ? false : true; // INVERTED
             },
             this // Reference to this subsystem to set requirements
         );
@@ -294,7 +295,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         updateLimelightPoseForCamera("limelight-forward");
         updateLimelightPoseForCamera("limelight-backk");
+    }
 
+    public void resetPoseFromLimelight() {
+        // Use MT1 since it doesn't need heading
+        LimelightHelpers.PoseEstimate mt1 = 
+            LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-forward");
+        
+        if (mt1 == null || mt1.tagCount == 0) return;
+        
+        // Hard reset odometry to MT1 pose - this gives MT2 correct position AND heading
+        this.resetPose(mt1.pose);
     }
 
     private void startSimThread() {
@@ -367,6 +378,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     private void updateLimelightPoseForCamera(String cameraName) {
+        if (suppressVision) return;
+
         LimelightHelpers.SetRobotOrientation(
             cameraName, 
             this.getState().Pose.getRotation().getDegrees(), 
@@ -378,13 +391,54 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         if (raw.length < 6) return;
         if (mt2 == null || mt2.tagCount == 0) return;
-        if (mt2.avgTagDist > 4.0) return;
+        if (mt2.avgTagDist > 5.5) return;
 
         Pose2d pose = new Pose2d(raw[0], raw[1], Rotation2d.fromDegrees(raw[5]));
         double latency = raw.length >= 8 ? (raw[6] + raw[7]) / 1000.0 : 0.0;
         double timestamp = Utils.fpgaToCurrentTime(Timer.getFPGATimestamp() - latency);
 
         super.addVisionMeasurement(pose, timestamp, VecBuilder.fill(0.7, 0.7, 9999999));
+    }
+
+    // Alternative Limelights: gain 4 exposure 120
+
+    private void updateLimelightPoseForCameraOnlyMT2(String cameraName) {
+        if (suppressVision) return;
+
+        LimelightHelpers.SetRobotOrientation(
+            cameraName,
+            this.getState().Pose.getRotation().getDegrees(),
+            0, 0, 0, 0, 0
+        );
+
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(cameraName);
+        
+        if (mt2 == null || mt2.tagCount == 0) return;
+        if (mt2.avgTagDist > 5.5) return;
+        if (Math.abs(this.getState().Speeds.omegaRadiansPerSecond) > 1.0) return;
+
+        double xyStdDev = 0.05 * Math.pow(mt2.avgTagDist, 2);
+
+        /*System.out.println("Limelight pose: " + mt2.pose);
+        System.out.println("Odometry pose: " + getPose());*/
+
+        //System.out.println(cameraName + " pose: " + mt2.pose + " tags: " + mt2.tagCount + " dist: " + mt2.avgTagDist);
+
+        double latency = mt2.latency / 1000.0;
+        double timestamp = Utils.fpgaToCurrentTime(Timer.getFPGATimestamp() - latency);
+
+        super.addVisionMeasurement(mt2.pose, 
+            timestamp, 
+            VecBuilder.fill(xyStdDev, xyStdDev, 9999999));
+    }
+
+    private boolean suppressVision = false;
+
+    public void suppressVisionForAuto() {
+        suppressVision = true;
+        Commands.waitSeconds(0.5).andThen(
+            Commands.runOnce(() -> suppressVision = false)
+        ).schedule();
     }
 
     public Pose2d getPose() {
@@ -400,33 +454,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             new SwerveRequest.ApplyRobotSpeeds()
                 .withSpeeds(speeds)
         );
-    }
 
-    private void updateLimelightPoseForCameraMT2(String cameraName) {
-        LimelightHelpers.SetRobotOrientation(
-            cameraName,
-            this.getState().Pose.getRotation().getDegrees(),
-            0, 0, 0, 0, 0
-        );
-
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(cameraName);
-
-        if (mt2 == null) return;
-        if (mt2.tagCount == 0) return;
-        if (mt2.avgTagDist > 3.5) return;
-
-        // Reject if robot is rotating too fast — MT2 pose goes bad during spin
-        double yawRateDegPerSec = Math.abs(this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble());
-        if (yawRateDegPerSec > 720) return;
-
-        // Dynamic stddevs: tighter when close + multiple tags, looser when far/single tag
-        double distanceFactor = mt2.avgTagDist * mt2.avgTagDist; // square for aggressive falloff
-        double tagCountFactor = mt2.tagCount > 1 ? 0.5 : 1.0;   // multi-tag bonus
-        double xyStddev = 0.3 * distanceFactor * tagCountFactor;
-        xyStddev = Math.max(0.05, Math.min(xyStddev, 2.0));      // clamp to sane range
-
-        double timestamp = Utils.fpgaToCurrentTime(Timer.getFPGATimestamp() - mt2.latency / 1000.0);
-
-        super.addVisionMeasurement(mt2.pose, timestamp, VecBuilder.fill(xyStddev, xyStddev, 9999999));
+        System.out.println("Relative Drive!!!!!!!!!!!!!!!!!!!!! ~~~~~~ :D");
     }
 }

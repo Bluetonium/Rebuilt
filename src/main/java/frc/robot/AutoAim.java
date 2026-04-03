@@ -7,6 +7,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
@@ -38,7 +39,7 @@ public class AutoAim {
         double dx = robotContainer.getHubX() - robotPos.getX();
         double dy = 4.034 - robotPos.getY();
 
-        return new Translation2d(dx, dy).getAngle().plus(Rotation2d.fromDegrees(180));
+        return new Translation2d(dx, dy).getAngle();
     }
 
     public double getDistanceToHub() {
@@ -51,9 +52,18 @@ public class AutoAim {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    public Translation2d getFieldRelativeVelocity() {
+        ChassisSpeeds speeds = drivetrain.getState().Speeds;
+        return new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    }
+
     public Command autoAimCommand() {
         return drivetrain.applyRequest(() -> {
-            Rotation2d target = getAngleToHub();
+            Rotation2d target = getAngleToHub().plus(Rotation2d.fromDegrees(-180));
+
+            /*if(!RobotContainer.isRed()) {
+                target = target.plus(Rotation2d.fromDegrees(-180));
+            }*/
 
             return driveAtAngle
                 .withVelocityX(-RobotContainer.chassisController.getLeftY() * RobotContainer.MaxSpeed)
@@ -63,7 +73,7 @@ public class AutoAim {
     }
 
     public boolean isAimed() {
-        Rotation2d target = getAngleToHub().plus(Rotation2d.fromDegrees(180));
+        Rotation2d target = getAngleToHub();
         Rotation2d current = drivetrain.getState().Pose.getRotation();
 
         double error = MathUtil.angleModulus(
@@ -78,8 +88,28 @@ public class AutoAim {
             autoAimCommand(),
             Commands.sequence(
                 Commands.waitUntil(this::isAimed).withTimeout(3.0),
-                RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(7.0)
+                RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(15.0)
             )
+        );
+    }
+
+    public Command alignStaticVelocity() {
+        return Commands.parallel(
+            autoAimCommand(),
+            Commands.sequence(
+                Commands.waitUntil(this::isAimed).withTimeout(3.0),
+                RobotContainer.getShooter().constantVelocityRunFlywheelAndLoaderCenter().withTimeout(15.0)
+            )
+        );
+    }
+
+    public Command alignShort() {
+        return Commands.deadline(
+            Commands.sequence(
+                Commands.waitUntil(this::isAimed).withTimeout(3.0),
+                RobotContainer.getShooter().runFlywheelAndLoader().withTimeout(6.0)
+            ),
+            autoAimCommand()
         );
     }
 

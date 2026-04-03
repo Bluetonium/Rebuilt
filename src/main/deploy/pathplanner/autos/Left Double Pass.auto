@@ -7,13 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Center"
+            "pathName": "LeftMoveToCenter"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftMoveToField"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "align"
+            "name": "alignShort"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftMoveToCenterAfterShoot"
           }
         }
       ]
